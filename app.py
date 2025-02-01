@@ -37,8 +37,8 @@ col1, col2 = st.columns([2, 1])
 with col1:
     st.header("📝 Ajouter un élève")
     nom = st.text_input("Nom de l'élève")
-    niveau = st.number_input("Niveau de départ", min_value=0, max_value=10, step=1)
-    points_comp = st.number_input("Points de compétence", min_value=0, max_value=500, step=5)
+    niveau = st.number_input("Niveau", min_value=0, max_value=1000, step=1)
+    points_comp = st.number_input("Points de compétence", min_value=0, max_value=5000, step=5)
     competences = st.multiselect("Compétences principales", ["FAVEDS 🤸", "Stratégie 🧠", "Coopération 🤝", "Engagement 🌟"])
     
     if st.button("Ajouter l'élève") and nom:
@@ -50,6 +50,26 @@ with col1:
 with col2:
     st.header("📋 Liste des élèves")
     st.dataframe(st.session_state["students"], height=250)
+    
+    # Modifier le niveau d'un élève
+    st.header("🛠 Modifier un élève")
+    if not st.session_state["students"].empty:
+        selected_student = st.selectbox("🎓 Sélectionner un élève à modifier", st.session_state["students"]["Nom"])
+        if selected_student:
+            new_level = st.number_input("Modifier le niveau", min_value=0, max_value=10, step=1, value=int(st.session_state["students"].loc[st.session_state["students"]["Nom"] == selected_student, "Niveau"].values[0]))
+            if st.button("Mettre à jour le niveau"):
+                st.session_state["students"].loc[st.session_state["students"]["Nom"] == selected_student, "Niveau"] = new_level
+                save_data(st.session_state["students"])
+                st.success(f"✅ Niveau de {selected_student} mis à jour à {new_level}.")
+    
+    # Supprimer un élève
+    st.header("🗑 Supprimer un élève")
+    if not st.session_state["students"].empty:
+        student_to_delete = st.selectbox("❌ Sélectionner un élève à supprimer", st.session_state["students"]["Nom"])
+        if st.button("Supprimer"):
+            st.session_state["students"] = st.session_state["students"][st.session_state["students"]["Nom"] != student_to_delete]
+            save_data(st.session_state["students"])
+            st.success(f"🗑 {student_to_delete} a été supprimé.")
 
 # Attribution automatique des rôles
 st.header("🎭 Attribution des Rôles")
@@ -65,22 +85,3 @@ if not st.session_state["students"].empty:
         roles = assign_roles(student_data["Points de Compétence"], student_data["Compétences"].split(", "))
         st.write(f"🎖️ Rôles attribués à **{selected_student}**:")
         st.success(roles)
-
-# Boutique des pouvoirs
-st.header("🛍️ Boutique de Pouvoirs")
-store_items = {
-    "Le malin / la maligne": 40,
-    "Choix d’un jeu (5 min) ou donner 20 niveaux": 50,
-    "Maître des groupes (1h30) ou doubler points de compétence": 100,
-    "Maître du thème d’une séance": 150,
-    "Roi / Reine de la séquence": 300
-}
-selected_item = st.selectbox("🛒 Choisir un pouvoir", list(store_items.keys()))
-if st.button("Acheter") and selected_student:
-    cost = store_items[selected_item]
-    if student_data["Niveau"] >= cost:
-        st.session_state["students"].loc[st.session_state["students"]["Nom"] == selected_student, "Niveau"] -= cost
-        save_data(st.session_state["students"])
-        st.success(f"🛍️ **{selected_student}** a acheté '**{selected_item}**' pour {cost} niveaux.")
-    else:
-        st.error("❌ Niveaux insuffisants !")
