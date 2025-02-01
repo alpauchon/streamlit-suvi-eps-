@@ -1,97 +1,64 @@
-import streamlit as st
-import pandas as pd
 
-# Configuration générale de l'application
-st.set_page_config(page_title="Suivi EPS", page_icon="🏆", layout="wide")
+➕ Ajouter un élève
+Nom de l'élève
 
-# Chargement et sauvegarde des données
-def load_data():
-    try:
-        df = pd.read_csv("students_data.csv")
-        if df.empty:
-            raise FileNotFoundError
-        return df.fillna(0)  # Remplissage des valeurs NaN avec 0
-    except FileNotFoundError:
-        return pd.DataFrame({"Nom": [], "Niveau": [], "Points de Compétence": [], "FAVEDS 🤸": [0], "Stratégie 🧠": [0], "Coopération 🤝": [0], "Engagement 🌟": [0], "Rôles": [], "Pouvoirs": []})
+Niveau de départ
 
-def save_data(df):
-    df.to_csv("students_data.csv", index=False)
 
-if "students" not in st.session_state:
-    st.session_state["students"] = load_data()
-if "accepted_rules" not in st.session_state:
-    st.session_state["accepted_rules"] = False
 
-# Affichage de la première page avec les règles du jeu
-if not st.session_state["accepted_rules"]:
-    st.title("📜 Règles du Jeu")
-    st.markdown("""
-    - L’élève peut gagner **4 niveaux** par séance de 45 minutes.
-      - **1 niveau** pour le fair-play.
-      - **1 niveau** pour le respect.
-      - **1 niveau** pour l’investissement.
-      - **1 niveau** pour l’atteinte des objectifs du cours.
-    - Tous les élèves commencent avec le rôle **d’Apprenti(e)**.
-    - **1 niveau = 5 points de compétences** à répartir librement.
-    - Chaque élève peut se spécialiser dans **2 compétences uniquement**.
-    """)
-    
-    if st.button("OK, j'ai compris les règles"):
-        st.session_state["accepted_rules"] = True
-    st.stop()
+FAVEDS 🤸
 
-# Ajout d'un élève
-st.title("➕ Ajouter un élève")
-nom = st.text_input("Nom de l'élève")
-niveau = st.number_input("Niveau de départ", min_value=0, max_value=10, step=1)
-points_comp = niveau * 5
-faveds = st.number_input("FAVEDS 🤸", min_value=0, max_value=points_comp, step=1, value=0)
-strategie = st.number_input("Stratégie 🧠", min_value=0, max_value=points_comp - faveds, step=1, value=0)
-cooperation = st.number_input("Coopération 🤝", min_value=0, max_value=points_comp - faveds - strategie, step=1, value=0)
-engagement = points_comp - faveds - strategie - cooperation
 
-if st.button("Ajouter l'élève") and nom:
-    new_data = pd.DataFrame({
-        "Nom": [nom], "Niveau": [niveau], "Points de Compétence": [points_comp],
-        "FAVEDS 🤸": [faveds], "Stratégie 🧠": [strategie], "Coopération 🤝": [cooperation], "Engagement 🌟": [engagement], "Rôles": ["Apprenti(e)"], "Pouvoirs": [""]
-    })
-    st.session_state["students"] = pd.concat([st.session_state["students"], new_data], ignore_index=True)
-    save_data(st.session_state["students"])
-    st.success(f"✅ {nom} ajouté avec niveau {niveau} et répartition des points complétée.")
 
-# Affichage du tableau général
-st.title("📊 Suivi Général des Élèves")
-st.markdown("**Modifiez directement les valeurs dans le tableau ci-dessous.**")
-if not st.session_state["students"].empty:
-    st.session_state["students"] = st.data_editor(st.session_state["students"], num_rows="dynamic", use_container_width=True)
-    save_data(st.session_state["students"])
+Stratégie 🧠
 
-# Sélection d'un élève pour voir sa fiche détaillée
-st.subheader("🔍 Sélectionner un élève")
-if not st.session_state["students"].empty:
-    selected_student = st.selectbox("Choisir un élève", st.session_state["students"]["Nom"])
-    if selected_student and not st.session_state["students"].loc[st.session_state["students"]["Nom"] == selected_student].empty:
-        student_data = st.session_state["students"].loc[st.session_state["students"]["Nom"] == selected_student].iloc[0]
-        
-        st.title(f"📌 Fiche de {selected_student}")
-        st.write(f"**Niveau :** {student_data['Niveau']}")
-        st.write(f"**Points de Compétence :** {student_data['Points de Compétence']}")
-        
-        st.write("### 🛒 Boutique des Pouvoirs")
-        store_items = {
-            "Le malin / la maligne": 40,
-            "Choix d’un jeu (5 min) ou donner 20 niveaux": 50,
-            "Maître des groupes (1h30) ou doubler points de compétence": 100,
-            "Maître du thème d’une séance": 150,
-            "Roi / Reine de la séquence": 300
-        }
-        selected_item = st.selectbox("🛍️ Choisir un pouvoir", list(store_items.keys()))
-        if st.button("Acheter"):
-            cost = store_items[selected_item]
-            if student_data["Niveau"] >= cost:
-                st.session_state["students"].loc[st.session_state["students"]["Nom"] == selected_student, "Niveau"] -= cost
-                st.session_state["students"].loc[st.session_state["students"]["Nom"] == selected_student, "Pouvoirs"] += f", {selected_item}" if student_data["Pouvoirs"] else selected_item
-                save_data(st.session_state["students"])
-                st.success(f"🛍️ {selected_student} a acheté '{selected_item}'.")
-            else:
-                st.error("❌ Niveaux insuffisants !")
+
+
+Coopération 🤝
+
+
+
+📊 Suivi Général des Élèves
+Modifiez directement les valeurs dans le tableau ci-dessous.
+
+🔍 Sélectionner un élève
+Choisir un élève
+Jérome
+
+📌 Fiche de Jérome
+Niveau : 300.0
+
+Points de Compétence : 20.0
+
+🛒 Boutique des Pouvoirs
+🛍️ Choisir un pouvoir
+Roi / Reine de la séquence
+
+numpy._core._exceptions._UFuncNoLoopError: This app has encountered an error. The original error message is redacted to prevent data leaks. Full error details have been recorded in the logs (if you're on Streamlit Cloud, click on 'Manage app' in the lower right of your app).
+Traceback:
+File "/mount/src/streamlit-suvi-eps-/app.py", line 93, in <module>
+    st.session_state["students"].loc[st.session_state["students"]["Nom"] == selected_student, "Pouvoirs"] += f", {selected_item}" if student_data["Pouvoirs"] else selected_item
+File "/home/adminuser/venv/lib/python3.12/site-packages/pandas/core/generic.py", line 12719, in __iadd__
+    return self._inplace_method(other, type(self).__add__)  # type: ignore[operator]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "/home/adminuser/venv/lib/python3.12/site-packages/pandas/core/generic.py", line 12689, in _inplace_method
+    result = op(self, other)
+             ^^^^^^^^^^^^^^^
+File "/home/adminuser/venv/lib/python3.12/site-packages/pandas/core/ops/common.py", line 76, in new_method
+    return method(self, other)
+           ^^^^^^^^^^^^^^^^^^^
+File "/home/adminuser/venv/lib/python3.12/site-packages/pandas/core/arraylike.py", line 186, in __add__
+    return self._arith_method(other, operator.add)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "/home/adminuser/venv/lib/python3.12/site-packages/pandas/core/series.py", line 6135, in _arith_method
+    return base.IndexOpsMixin._arith_method(self, other, op)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "/home/adminuser/venv/lib/python3.12/site-packages/pandas/core/base.py", line 1382, in _arith_method
+    result = ops.arithmetic_op(lvalues, rvalues, op)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "/home/adminuser/venv/lib/python3.12/site-packages/pandas/core/ops/array_ops.py", line 283, in arithmetic_op
+    res_values = _na_arithmetic_op(left, right, op)  # type: ignore[arg-type]
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "/home/adminuser/venv/lib/python3.12/site-packages/pandas/core/ops/array_ops.py", line 218, in _na_arithmetic_op
+    result = func(left, right)
+             ^^^^^^^^^^^^^^^^^
