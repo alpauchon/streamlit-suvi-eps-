@@ -10,7 +10,7 @@ def load_data():
         df = pd.read_csv("students_data.csv")
         if df.empty:
             raise FileNotFoundError
-        return df
+        return df.fillna(0)  # Remplissage des valeurs NaN avec 0
     except FileNotFoundError:
         return pd.DataFrame({"Nom": [], "Niveau": [], "Points de Compétence": [], "FAVEDS 🤸": [0], "Stratégie 🧠": [0], "Coopération 🤝": [0], "Engagement 🌟": [0], "Rôles": [], "Pouvoirs": []})
 
@@ -80,13 +80,13 @@ if not st.session_state["students"].empty:
         st.write("### 📊 Répartition des compétences")
         col1, col2, col3, col4 = st.columns(4)
         with col1:
-            faveds = st.number_input("FAVEDS 🤸", value=int(student_data.get('FAVEDS 🤸', 0) or 0), min_value=0, step=1)
+            faveds = st.number_input("FAVEDS 🤸", value=int(student_data['FAVEDS 🤸']) if pd.notna(student_data['FAVEDS 🤸']) else 0, min_value=0, step=1)
         with col2:
-            strategie = st.number_input("Stratégie 🧠", value=int(student_data.get('Stratégie 🧠', 0) or 0), min_value=0, step=1)
+            strategie = st.number_input("Stratégie 🧠", value=int(student_data['Stratégie 🧠']) if pd.notna(student_data['Stratégie 🧠']) else 0, min_value=0, step=1)
         with col3:
-            cooperation = st.number_input("Coopération 🤝", value=int(student_data.get('Coopération 🤝', 0) or 0), min_value=0, step=1)
+            cooperation = st.number_input("Coopération 🤝", value=int(student_data['Coopération 🤝']) if pd.notna(student_data['Coopération 🤝']) else 0, min_value=0, step=1)
         with col4:
-            engagement = st.number_input("Engagement 🌟", value=int(student_data.get('Engagement 🌟', 0) or 0), min_value=0, step=1)
+            engagement = st.number_input("Engagement 🌟", value=int(student_data['Engagement 🌟']) if pd.notna(student_data['Engagement 🌟']) else 0, min_value=0, step=1)
         
         if st.button("Mettre à jour les compétences"):
             st.session_state["students"].loc[st.session_state["students"]["Nom"] == selected_student, ["FAVEDS 🤸", "Stratégie 🧠", "Coopération 🤝", "Engagement 🌟"]] = [faveds, strategie, cooperation, engagement]
