@@ -53,11 +53,16 @@ st.title("➕ Ajouter un élève")
 nom = st.text_input("Nom de l'élève")
 niveau = st.number_input("Niveau de départ", min_value=0, max_value=10, step=1)
 points_comp = niveau * 5
-faveds = st.number_input("FAVEDS 🤸", min_value=0, max_value=points_comp, step=1, value=0)
-strategie = st.number_input("Stratégie 🧠", min_value=0, max_value=points_comp - faveds, step=1, value=0)
-cooperation = st.number_input("Coopération 🤝", min_value=0, max_value=points_comp - faveds - strategie, step=1, value=0)
-engagement = st.number_input("Engagement🌟", min_value=0, max_value=points_comp - faveds - strategie, step=1, value=0)
-engagement = points_comp - faveds - strategie - cooperation
+
+# Allocation de points librement entre les compétences
+remaining_points = points_comp
+faveds = st.number_input("FAVEDS 🤸", min_value=0, max_value=remaining_points, step=1, value=0)
+remaining_points -= faveds
+strategie = st.number_input("Stratégie 🧠", min_value=0, max_value=remaining_points, step=1, value=0)
+remaining_points -= strategie
+cooperation = st.number_input("Coopération 🤝", min_value=0, max_value=remaining_points, step=1, value=0)
+remaining_points -= cooperation
+engagement = st.number_input("Engagement 🌟", min_value=0, max_value=remaining_points, step=1, value=remaining_points)
 
 if st.button("Ajouter l'élève") and nom:
     new_data = pd.DataFrame({
