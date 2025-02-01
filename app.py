@@ -77,18 +77,21 @@ if not st.session_state["students"].empty:
         st.write(f"**Niveau :** {student_data['Niveau']}")
         st.write(f"**Points de Compétence :** {student_data['Points de Compétence']}")
         
-        st.write("### 📊 Répartition des compétences")
-        col1, col2, col3, col4 = st.columns(4)
-        with col1:
-            faveds = st.number_input("FAVEDS 🤸", value=int(student_data['FAVEDS 🤸']) if pd.notna(student_data['FAVEDS 🤸']) else 0, min_value=0, step=1)
-        with col2:
-            strategie = st.number_input("Stratégie 🧠", value=int(student_data['Stratégie 🧠']) if pd.notna(student_data['Stratégie 🧠']) else 0, min_value=0, step=1)
-        with col3:
-            cooperation = st.number_input("Coopération 🤝", value=int(student_data['Coopération 🤝']) if pd.notna(student_data['Coopération 🤝']) else 0, min_value=0, step=1)
-        with col4:
-            engagement = st.number_input("Engagement 🌟", value=int(student_data['Engagement 🌟']) if pd.notna(student_data['Engagement 🌟']) else 0, min_value=0, step=1)
-        
-        if st.button("Mettre à jour les compétences"):
-            st.session_state["students"].loc[st.session_state["students"]["Nom"] == selected_student, ["FAVEDS 🤸", "Stratégie 🧠", "Coopération 🤝", "Engagement 🌟"]] = [faveds, strategie, cooperation, engagement]
-            save_data(st.session_state["students"])
-            st.success(f"✅ Compétences mises à jour pour {selected_student}.")
+        st.write("### 🛒 Boutique des Pouvoirs")
+        store_items = {
+            "Le malin / la maligne": 40,
+            "Choix d’un jeu (5 min) ou donner 20 niveaux": 50,
+            "Maître des groupes (1h30) ou doubler points de compétence": 100,
+            "Maître du thème d’une séance": 150,
+            "Roi / Reine de la séquence": 300
+        }
+        selected_item = st.selectbox("🛍️ Choisir un pouvoir", list(store_items.keys()))
+        if st.button("Acheter"):
+            cost = store_items[selected_item]
+            if student_data["Niveau"] >= cost:
+                st.session_state["students"].loc[st.session_state["students"]["Nom"] == selected_student, "Niveau"] -= cost
+                st.session_state["students"].loc[st.session_state["students"]["Nom"] == selected_student, "Pouvoirs"] += f", {selected_item}" if student_data["Pouvoirs"] else selected_item
+                save_data(st.session_state["students"])
+                st.success(f"🛍️ {selected_student} a acheté '{selected_item}'.")
+            else:
+                st.error("❌ Niveaux insuffisants !")
