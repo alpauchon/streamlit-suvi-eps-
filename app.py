@@ -145,7 +145,6 @@ if not st.session_state["students"].empty:
                 st.error("❌ Niveaux insuffisants !")
               
 # 🏅 Boutique des Rôles
-st.write("### 🏅 Boutique des Rôles")
     | Rôles | Points nécessaires | Compétences requises | Explication |
     |---|---|---|---|
     | Testeur.euse | 200 | FAVEDS | Peut essayer en premier les nouveaux exercices. |
@@ -160,6 +159,7 @@ st.write("### 🏅 Boutique des Rôles")
     | Réducteur.rice des contraintes | 200 | FAVEDS + Engagement | Accès à des versions simplifiées ou allégées des consignes. |
     | Autonome | 200 | Stratégie + Engagement | Peut choisir son propre parcours ou défi. |
     | Responsable de séance | 350 | Stratégie + Coopération + Engagement | Peut diriger une partie de la séance. |
+st.write("### 🏅 Boutique des Rôles")
 
 roles_store = {
     "🧪 Testeur.euse": {"Coût": 200, "Compétences Requises": ["FAVEDS 🤸"]},
