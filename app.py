@@ -41,7 +41,7 @@ col1, col2 = st.columns([2, 1])
 with col1:
     st.header("📝 Ajouter un élève")
     nom = st.text_input("Nom de l'élève")
-    niveau = st.number_input("Niveau de départ", min_value=0, max_value=10, step=1)
+    niveau = st.number_input("Niveau de départ", min_value=0, max_value=1000, step=1)
     points_comp = st.number_input("Points de compétence", min_value=0, max_value=500, step=5)
     competences = st.multiselect("Compétences principales", ["FAVEDS 🤸", "Stratégie 🧠", "Coopération 🤝", "Engagement 🌟"])
     
