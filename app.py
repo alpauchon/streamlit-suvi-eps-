@@ -12,7 +12,7 @@ def load_data():
             raise FileNotFoundError
         return df
     except FileNotFoundError:
-        return pd.DataFrame({"Nom": [], "Niveau": [], "Points de Compétence": [], "FAVEDS 🤸": [], "Stratégie 🧠": [], "Coopération 🤝": [], "Engagement 🌟": [], "Rôles": [], "Pouvoirs": []})
+        return pd.DataFrame({"Nom": [], "Niveau": [], "Points de Compétence": [], "FAVEDS 🤸": [0], "Stratégie 🧠": [0], "Coopération 🤝": [0], "Engagement 🌟": [0], "Rôles": [], "Pouvoirs": []})
 
 def save_data(df):
     df.to_csv("students_data.csv", index=False)
@@ -45,9 +45,9 @@ st.title("➕ Ajouter un élève")
 nom = st.text_input("Nom de l'élève")
 niveau = st.number_input("Niveau de départ", min_value=0, max_value=10, step=1)
 points_comp = niveau * 5
-faveds = st.number_input("FAVEDS 🤸", min_value=0, max_value=points_comp, step=1)
-strategie = st.number_input("Stratégie 🧠", min_value=0, max_value=points_comp - faveds, step=1)
-cooperation = st.number_input("Coopération 🤝", min_value=0, max_value=points_comp - faveds - strategie, step=1)
+faveds = st.number_input("FAVEDS 🤸", min_value=0, max_value=points_comp, step=1, value=0)
+strategie = st.number_input("Stratégie 🧠", min_value=0, max_value=points_comp - faveds, step=1, value=0)
+cooperation = st.number_input("Coopération 🤝", min_value=0, max_value=points_comp - faveds - strategie, step=1, value=0)
 engagement = points_comp - faveds - strategie - cooperation
 
 if st.button("Ajouter l'élève") and nom:
@@ -80,13 +80,13 @@ if not st.session_state["students"].empty:
         st.write("### 📊 Répartition des compétences")
         col1, col2, col3, col4 = st.columns(4)
         with col1:
-            faveds = st.number_input("FAVEDS 🤸", value=int(student_data.get('FAVEDS 🤸', 0)), min_value=0, step=1)
+            faveds = st.number_input("FAVEDS 🤸", value=int(student_data.get('FAVEDS 🤸', 0) or 0), min_value=0, step=1)
         with col2:
-            strategie = st.number_input("Stratégie 🧠", value=int(student_data.get('Stratégie 🧠', 0)), min_value=0, step=1)
+            strategie = st.number_input("Stratégie 🧠", value=int(student_data.get('Stratégie 🧠', 0) or 0), min_value=0, step=1)
         with col3:
-            cooperation = st.number_input("Coopération 🤝", value=int(student_data.get('Coopération 🤝', 0)), min_value=0, step=1)
+            cooperation = st.number_input("Coopération 🤝", value=int(student_data.get('Coopération 🤝', 0) or 0), min_value=0, step=1)
         with col4:
-            engagement = st.number_input("Engagement 🌟", value=int(student_data.get('Engagement 🌟', 0)), min_value=0, step=1)
+            engagement = st.number_input("Engagement 🌟", value=int(student_data.get('Engagement 🌟', 0) or 0), min_value=0, step=1)
         
         if st.button("Mettre à jour les compétences"):
             st.session_state["students"].loc[st.session_state["students"]["Nom"] == selected_student, ["FAVEDS 🤸", "Stratégie 🧠", "Coopération 🤝", "Engagement 🌟"]] = [faveds, strategie, cooperation, engagement]
