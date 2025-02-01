@@ -42,9 +42,8 @@ if not st.session_state["accepted_rules"]:
     - Tous les élèves commencent avec le rôle **d’Apprenti(e)**.
     - **1 niveau = 5 points de compétences** à répartir librement.
     - Chaque élève peut se spécialiser dans **2 compétences uniquement**.
-    """)
     
-  ### 🏪 Boutique des rôles et pouvoirs
+    ### 🏪 Boutique des rôles et pouvoirs
     | Rôles | Points nécessaires | Compétences requises | Explication |
     |---|---|---|---|
     | Testeur.euse | 200 | FAVEDS | Peut essayer en premier les nouveaux exercices. |
