@@ -9,7 +9,7 @@ def load_data():
     try:
         return pd.read_csv("students_data.csv")
     except FileNotFoundError:
-        return pd.DataFrame({"Nom": [], "Niveau": [], "Points de Compétence": [], "Compétences": []})
+        return pd.DataFrame({"Nom": [], "Niveau": [], "Points de Compétence": [], "Compétences": [], "Pouvoirs": []})
 
 def save_data(df):
     df.to_csv("students_data.csv", index=False)
@@ -41,6 +41,18 @@ st.markdown("""
 
 st.title("📊 Suivi de Progression en EPS")
 
+st.subheader("📜 Règles du Jeu")
+st.markdown("""
+- L’élève peut gagner **4 niveaux** par séance de 45 minutes.
+  - **1 niveau** pour le fair-play.
+  - **1 niveau** pour le respect.
+  - **1 niveau** pour l’investissement.
+  - **1 niveau** pour l’atteinte des objectifs du cours.
+- Tous les élèves commencent avec le rôle **d’Apprenti(e)**.
+- **1 niveau = 5 points de compétences** à répartir librement.
+- Chaque élève peut se spécialiser dans **2 compétences uniquement**.
+""")
+
 col1, col2 = st.columns([2, 1])
 
 with col1:
@@ -48,10 +60,10 @@ with col1:
     nom = st.text_input("Nom de l'élève")
     niveau = st.number_input("Niveau de départ", min_value=0, max_value=10, step=1)
     points_comp = st.number_input("Points de compétence", min_value=0, max_value=500, step=5)
-    competences = st.multiselect("Compétences principales", ["FAVEDS 🤸", "Stratégie 🧠", "Coopération 🤝", "Engagement 🌟"])
+    competences = st.multiselect("Compétences principales (max 2)", ["FAVEDS 🤸", "Stratégie 🧠", "Coopération 🤝", "Engagement 🌟"], max_selections=2)
     
     if st.button("Ajouter l'élève") and nom:
-        new_data = pd.DataFrame({"Nom": [nom], "Niveau": [niveau], "Points de Compétence": [points_comp], "Compétences": [", ".join(competences)]})
+        new_data = pd.DataFrame({"Nom": [nom], "Niveau": [niveau], "Points de Compétence": [points_comp], "Compétences": [", ".join(competences)], "Pouvoirs": [""]})
         st.session_state["students"] = pd.concat([st.session_state["students"], new_data], ignore_index=True)
         save_data(st.session_state["students"])
         st.success(f"✅ {nom} ajouté avec niveau {niveau} et {points_comp} points de compétence.")
