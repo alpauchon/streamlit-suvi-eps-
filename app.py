@@ -1,22 +1,22 @@
 import streamlit as st
 import pandas as pd
 
-# Fonction pour charger les données sauvegardées
+# Configuration générale de l'application
+st.set_page_config(page_title="Suivi EPS", page_icon="🏆", layout="wide")
+
+# Chargement et sauvegarde des données
 def load_data():
     try:
         return pd.read_csv("students_data.csv")
     except FileNotFoundError:
         return pd.DataFrame({"Nom": [], "Niveau": [], "Points de Compétence": [], "Compétences": []})
 
-# Fonction pour sauvegarder les données
 def save_data(df):
     df.to_csv("students_data.csv", index=False)
 
-# Chargement des données
 if "students" not in st.session_state:
     st.session_state["students"] = load_data()
 
-# Données des rôles
 roles_data = {
     "Rôle": ["🧪 Testeur.euse", "🎭 Démonstrateur.rice", "🔧 Facilitateur.rice", "⚖️ Créateur.rice de règles",
               "🎯 Meneur.euse tactique", "⚖️ Arbitre / Régulateur.rice", "🤝 Aide-Coach", "📋 Coordinateur.rice de groupe",
@@ -29,16 +29,25 @@ roles_data = {
 }
 roles_df = pd.DataFrame(roles_data)
 
+# Style CSS pour améliorer l'interface
+st.markdown("""
+    <style>
+        .main {background-color: #f4f4f4;}
+        .stButton>button {background-color: #4CAF50; color: white; padding: 10px; border-radius: 8px;}
+        .stDataFrame {border-radius: 10px; overflow: hidden;}
+        .stSelectbox, .stTextInput, .stNumberInput {border-radius: 8px; padding: 5px;}
+    </style>
+""", unsafe_allow_html=True)
+
 st.title("📊 Suivi de Progression en EPS")
 
-# Mise en page avec colonnes
 col1, col2 = st.columns([2, 1])
 
 with col1:
-    st.header("📝 Ajouter un élève")
+    st.subheader("📝 Ajouter un élève")
     nom = st.text_input("Nom de l'élève")
-    niveau = st.number_input("Niveau", min_value=0, max_value=1000, step=1)
-    points_comp = st.number_input("Points de compétence", min_value=0, max_value=5000, step=5)
+    niveau = st.number_input("Niveau de départ", min_value=0, max_value=10, step=1)
+    points_comp = st.number_input("Points de compétence", min_value=0, max_value=500, step=5)
     competences = st.multiselect("Compétences principales", ["FAVEDS 🤸", "Stratégie 🧠", "Coopération 🤝", "Engagement 🌟"])
     
     if st.button("Ajouter l'élève") and nom:
@@ -48,11 +57,10 @@ with col1:
         st.success(f"✅ {nom} ajouté avec niveau {niveau} et {points_comp} points de compétence.")
 
 with col2:
-    st.header("📋 Liste des élèves")
+    st.subheader("📋 Liste des élèves")
     st.dataframe(st.session_state["students"], height=250)
-    
-    # Modifier le niveau d'un élève
-    st.header("🛠 Modifier un élève")
+
+    st.subheader("🛠 Modifier un élève")
     if not st.session_state["students"].empty:
         selected_student = st.selectbox("🎓 Sélectionner un élève à modifier", st.session_state["students"]["Nom"])
         if selected_student:
@@ -62,8 +70,7 @@ with col2:
                 save_data(st.session_state["students"])
                 st.success(f"✅ Niveau de {selected_student} mis à jour à {new_level}.")
     
-    # Supprimer un élève
-    st.header("🗑 Supprimer un élève")
+    st.subheader("🗑 Supprimer un élève")
     if not st.session_state["students"].empty:
         student_to_delete = st.selectbox("❌ Sélectionner un élève à supprimer", st.session_state["students"]["Nom"])
         if st.button("Supprimer"):
@@ -71,8 +78,7 @@ with col2:
             save_data(st.session_state["students"])
             st.success(f"🗑 {student_to_delete} a été supprimé.")
 
-# Attribution automatique des rôles
-st.header("🎭 Attribution des Rôles")
+st.subheader("🎭 Attribution des Rôles")
 if not st.session_state["students"].empty:
     selected_student = st.selectbox("🎓 Choisir un élève", st.session_state["students"]["Nom"])
     
