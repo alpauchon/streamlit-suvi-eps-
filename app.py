@@ -128,6 +128,20 @@ if not st.session_state["students"].empty:
             "Maître du thème d’une séance": 150,
             "Roi / Reine de la séquence": 300
         }
+        | Rôles | Points nécessaires | Compétences requises | Explication |
+    |---|---|---|---|
+    | Testeur.euse | 200 | FAVEDS | Peut essayer en premier les nouveaux exercices. |
+    | Démonstrateur.rice | 150 | FAVEDS + Engagement | Présente les mouvements au reste du groupe. |
+    | Facilitateur.rice | 150 | Coopération + Engagement | Moins de répétitions imposées s’il maîtrise déjà l’exercice. |
+    | Créateur.rice de règles | 250 | Stratégie | Peut modifier certaines règles des exercices. |
+    | Meneur.euse tactique | 250 | Stratégie + Coopération | Oriente une équipe et propose des stratégies. |
+    | Arbitre / Régulateur.rice | 300 | Stratégie + Engagement | Aide à gérer les litiges et les décisions collectives. |
+    | Aide-coach | 250 | Coopération + Engagement | Peut accompagner un élève en difficulté. |
+    | Coordinateur.rice de groupe | 300 | Coopération | Premier choix des groupes. |
+    | Facilitateur.rice (social) | 250 | Coopération + Engagement | Peut proposer des ajustements pour favoriser l’intégration de tous. |
+    | Réducteur.rice des contraintes | 200 | FAVEDS + Engagement | Accès à des versions simplifiées ou allégées des consignes. |
+    | Autonome | 200 | Stratégie + Engagement | Peut choisir son propre parcours ou défi. |
+    | Responsable de séance | 350 | Stratégie + Coopération + Engagement | Peut diriger une partie de la séance.
         selected_item = st.selectbox("🛍️ Choisir un pouvoir", list(store_items.keys()))
         if st.button("Acheter"):
             cost = store_items[selected_item]
@@ -160,6 +174,15 @@ roles_store = {
     "🛤️ Autonome": {"Coût": 200, "Compétences Requises": ["Stratégie 🧠", "Engagement 🌟"]},
     "🏆 Responsable de séance": {"Coût": 350, "Compétences Requises": ["Stratégie 🧠", "Coopération 🤝", "Engagement 🌟"]}
 }
+  | Coût en niveau | Pouvoirs à choix |
+    |---|---|
+    | 40 | Le malin / la maligne : doubler ses niveaux gagnés à chaque cours. |
+    | 50 | Choix d’un jeu (5 min) ou donner 20 niveaux à quelqu’un. |
+    | 100 | Maître.sse des groupes pour une séance de 1h30 ou doubler ses points de compétences. |
+    | 150 | Maître.sse du thème d’une prochaine séance. |
+    | 300 | Roi / Reine de la séquence (permet de choisir le prochain thème que l’on fera pour 4 à 6 cours). |
+    """)
+    
 
 selected_role = st.selectbox("🎭 Choisir un rôle", list(roles_store.keys()))
 if st.button("Acquérir ce rôle"):
