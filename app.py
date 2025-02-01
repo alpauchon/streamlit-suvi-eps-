@@ -111,9 +111,46 @@ if not st.session_state["students"].empty:
             else:
                 print(f"[WARNING] {selected_student} n'a pas assez de niveaux pour acheter {selected_item}.")
                 st.error("❌ Niveaux insuffisants !")
+              
+# 🏅 Boutique des Rôles
+st.write("### 🏅 Boutique des Rôles")
 
-TypeError: This app has encountered an error. The original error message is redacted to prevent data leaks. Full error details have been recorded in the logs (if you're on Streamlit Cloud, click on 'Manage app' in the lower right of your app).
-Traceback:
-File "/mount/src/streamlit-suvi-eps-/app.py", line 139, in <module>
-    if student_data["Points de Compétence"] >= role_cost and all(comp in ["FAVEDS 🤸", "Stratégie 🧠", "Coopération 🤝", "Engagement 🌟"] for comp in required_competences):
-       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+roles_store = {
+    "🧪 Testeur.euse": {"Coût": 200, "Compétences Requises": ["FAVEDS 🤸"]},
+    "🎭 Démonstrateur.rice": {"Coût": 150, "Compétences Requises": ["FAVEDS 🤸", "Engagement 🌟"]},
+    "🔧 Facilitateur.rice": {"Coût": 150, "Compétences Requises": ["Coopération 🤝", "Engagement 🌟"]},
+    "⚖️ Créateur.rice de règles": {"Coût": 250, "Compétences Requises": ["Stratégie 🧠"]},
+    "🎯 Meneur.euse tactique": {"Coût": 250, "Compétences Requises": ["Stratégie 🧠", "Coopération 🤝"]},
+    "⚖️ Arbitre / Régulateur.rice": {"Coût": 300, "Compétences Requises": ["Stratégie 🧠", "Engagement 🌟"]},
+    "🤝 Aide-Coach": {"Coût": 250, "Compétences Requises": ["Coopération 🤝", "Engagement 🌟"]},
+    "📋 Coordinateur.rice de groupe": {"Coût": 300, "Compétences Requises": ["Coopération 🤝"]},
+    "🌍 Facilitateur.rice (social)": {"Coût": 250, "Compétences Requises": ["Coopération 🤝", "Engagement 🌟"]},
+    "⚡ Réducteur.rice des contraintes": {"Coût": 200, "Compétences Requises": ["FAVEDS 🤸", "Engagement 🌟"]},
+    "🛤️ Autonome": {"Coût": 200, "Compétences Requises": ["Stratégie 🧠", "Engagement 🌟"]},
+    "🏆 Responsable de séance": {"Coût": 350, "Compétences Requises": ["Stratégie 🧠", "Coopération 🤝", "Engagement 🌟"]}
+}
+
+selected_role = st.selectbox("🎭 Choisir un rôle", list(roles_store.keys()))
+if st.button("Acquérir ce rôle"):
+    role_cost = roles_store[selected_role]["Coût"]
+    required_competences = roles_store[selected_role]["Compétences Requises"]
+
+    # Vérification des points de compétence et compétences requises
+    student_competences = {
+        "FAVEDS 🤸": student_data["FAVEDS 🤸"],
+        "Stratégie 🧠": student_data["Stratégie 🧠"],
+        "Coopération 🤝": student_data["Coopération 🤝"],
+        "Engagement 🌟": student_data["Engagement 🌟"]
+    }
+
+    if student_data["Points de Compétence"] >= role_cost and all(student_competences[comp] > 0 for comp in required_competences):
+        st.session_state["students"].loc[st.session_state["students"]["Nom"] == selected_student, "Points de Compétence"] -= role_cost
+        roles_anciens = str(student_data["Rôles"]) if pd.notna(student_data["Rôles"]) else ""
+        nouveaux_roles = roles_anciens + ", " + selected_role if roles_anciens else selected_role
+        st.session_state["students"].loc[st.session_state["students"]["Nom"] == selected_student, "Rôles"] = nouveaux_roles
+        save_data(st.session_state["students"])
+        print(f"[INFO] {selected_student} a acquis le rôle {selected_role} pour {role_cost} points de compétence.")
+        st.success(f"🏅 {selected_student} a acquis le rôle '{selected_role}'.")
+    else:
+        print(f"[WARNING] {selected_student} n'a pas assez de points de compétence ou ne remplit pas les conditions pour acquérir {selected_role}.")
+        st.error("❌ Points de compétence insuffisants ou compétences requises non atteintes !")
