@@ -56,6 +56,7 @@ points_comp = niveau * 5
 faveds = st.number_input("FAVEDS 🤸", min_value=0, max_value=points_comp, step=1, value=0)
 strategie = st.number_input("Stratégie 🧠", min_value=0, max_value=points_comp - faveds, step=1, value=0)
 cooperation = st.number_input("Coopération 🤝", min_value=0, max_value=points_comp - faveds - strategie, step=1, value=0)
+engagement = st.number_input("Engagement🌟", min_value=0, max_value=points_comp - faveds - strategie, step=1, value=0)
 engagement = points_comp - faveds - strategie - cooperation
 
 if st.button("Ajouter l'élève") and nom:
