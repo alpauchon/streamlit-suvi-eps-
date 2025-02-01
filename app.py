@@ -1,24 +1,20 @@
 import streamlit as st
 import pandas as pd
 
-# Configuration de la mise en page
-st.set_page_config(page_title="Suivi EPS", page_icon="🏆", layout="wide")
+# Fonction pour charger les données sauvegardées
+def load_data():
+    try:
+        return pd.read_csv("students_data.csv")
+    except FileNotFoundError:
+        return pd.DataFrame({"Nom": [], "Niveau": [], "Points de Compétence": [], "Compétences": []})
 
-# CSS pour améliorer l'affichage
-st.markdown("""
-    <style>
-        .main {background-color: #f4f4f4;}
-        .stButton>button {background-color: #4CAF50; color: white; padding: 10px; border-radius: 8px;}
-        .stDataFrame {border-radius: 10px; overflow: hidden;}
-        .stSelectbox, .stTextInput, .stNumberInput {border-radius: 8px; padding: 5px;}
-    </style>
-""", unsafe_allow_html=True)
+# Fonction pour sauvegarder les données
+def save_data(df):
+    df.to_csv("students_data.csv", index=False)
 
-# Initialisation des données des élèves
+# Chargement des données
 if "students" not in st.session_state:
-    st.session_state["students"] = pd.DataFrame({
-        "Nom": [], "Niveau": [], "Points de Compétence": [], "Compétences": []
-    })
+    st.session_state["students"] = load_data()
 
 # Données des rôles
 roles_data = {
@@ -41,13 +37,14 @@ col1, col2 = st.columns([2, 1])
 with col1:
     st.header("📝 Ajouter un élève")
     nom = st.text_input("Nom de l'élève")
-    niveau = st.number_input("Niveau de départ", min_value=0, max_value=1000, step=1)
+    niveau = st.number_input("Niveau de départ", min_value=0, max_value=10, step=1)
     points_comp = st.number_input("Points de compétence", min_value=0, max_value=500, step=5)
     competences = st.multiselect("Compétences principales", ["FAVEDS 🤸", "Stratégie 🧠", "Coopération 🤝", "Engagement 🌟"])
     
     if st.button("Ajouter l'élève") and nom:
         new_data = pd.DataFrame({"Nom": [nom], "Niveau": [niveau], "Points de Compétence": [points_comp], "Compétences": [", ".join(competences)]})
         st.session_state["students"] = pd.concat([st.session_state["students"], new_data], ignore_index=True)
+        save_data(st.session_state["students"])
         st.success(f"✅ {nom} ajouté avec niveau {niveau} et {points_comp} points de compétence.")
 
 with col2:
@@ -83,6 +80,7 @@ if st.button("Acheter") and selected_student:
     cost = store_items[selected_item]
     if student_data["Niveau"] >= cost:
         st.session_state["students"].loc[st.session_state["students"]["Nom"] == selected_student, "Niveau"] -= cost
+        save_data(st.session_state["students"])
         st.success(f"🛍️ **{selected_student}** a acheté '**{selected_item}**' pour {cost} niveaux.")
     else:
         st.error("❌ Niveaux insuffisants !")
