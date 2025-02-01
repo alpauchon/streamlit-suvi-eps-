@@ -15,7 +15,11 @@ def load_data():
         return df.fillna(0)  # Remplissage des valeurs NaN avec 0
     except FileNotFoundError:
         print("[WARNING] Fichier non trouvé, création d'un nouveau DataFrame.")
-        return pd.DataFrame({"Nom": [], "Niveau": [], "Points de Compétence": [], "FAVEDS 🤸": [0], "Stratégie 🧠": [0], "Coopération 🤝": [0], "Engagement 🌟": [0], "Rôles": [], "Pouvoirs": []})
+        return pd.DataFrame({
+            "Nom": [], "Niveau": [], "Points de Compétence": [],
+            "FAVEDS 🤸": [], "Stratégie 🧠": [], "Coopération 🤝": [], "Engagement 🌟": [],
+            "Rôles": [], "Pouvoirs": []
+        })
 
 def save_data(df):
     df.to_csv("students_data.csv", index=False)
@@ -57,9 +61,10 @@ engagement = points_comp - faveds - strategie - cooperation
 if st.button("Ajouter l'élève") and nom:
     new_data = pd.DataFrame({
         "Nom": [nom], "Niveau": [niveau], "Points de Compétence": [points_comp],
-        "FAVEDS 🤸": [faveds], "Stratégie 🧠": [strategie], "Coopération 🤝": [cooperation], "Engagement 🌟": [engagement], "Rôles": ["Apprenti(e)"], "Pouvoirs": [""]
+        "FAVEDS 🤸": [faveds], "Stratégie 🧠": [strategie], "Coopération 🤝": [cooperation], "Engagement 🌟": [engagement],
+        "Rôles": ["Apprenti(e)"], "Pouvoirs": [""]
     })
-    st.session_state["students"] = pd.concat([st.session_state["students"], new_data], ignore_index=True)
+    st.session_state["students"] = pd.concat([st.session_state["students"], new_data], ignore_index=True).fillna("")
     save_data(st.session_state["students"])
     print(f"[INFO] Élève ajouté: {nom}, Niveau: {niveau}, Points: {points_comp}")
     st.success(f"✅ {nom} ajouté avec niveau {niveau} et répartition des points complétée.")
@@ -68,7 +73,7 @@ if st.button("Ajouter l'élève") and nom:
 st.title("📊 Suivi Général des Élèves")
 st.markdown("**Modifiez directement les valeurs dans le tableau ci-dessous.**")
 if not st.session_state["students"].empty:
-    st.session_state["students"] = st.data_editor(st.session_state["students"], num_rows="dynamic", use_container_width=True)
+    st.session_state["students"] = st.data_editor(st.session_state["students"], num_rows="dynamic", use_container_width=True).fillna("")
     save_data(st.session_state["students"])
     print("[INFO] Tableau des élèves mis à jour.")
 
