@@ -145,20 +145,6 @@ if not st.session_state["students"].empty:
                 st.error("❌ Niveaux insuffisants !")
               
 # 🏅 Boutique des Rôles
-    | Rôles | Points nécessaires | Compétences requises | Explication |
-    |---|---|---|---|
-    | Testeur.euse | 200 | FAVEDS | Peut essayer en premier les nouveaux exercices. |
-    | Démonstrateur.rice | 150 | FAVEDS + Engagement | Présente les mouvements au reste du groupe. |
-    | Facilitateur.rice | 150 | Coopération + Engagement | Moins de répétitions imposées s’il maîtrise déjà l’exercice. |
-    | Créateur.rice de règles | 250 | Stratégie | Peut modifier certaines règles des exercices. |
-    | Meneur.euse tactique | 250 | Stratégie + Coopération | Oriente une équipe et propose des stratégies. |
-    | Arbitre / Régulateur.rice | 300 | Stratégie + Engagement | Aide à gérer les litiges et les décisions collectives. |
-    | Aide-coach | 250 | Coopération + Engagement | Peut accompagner un élève en difficulté. |
-    | Coordinateur.rice de groupe | 300 | Coopération | Premier choix des groupes. |
-    | Facilitateur.rice (social) | 250 | Coopération + Engagement | Peut proposer des ajustements pour favoriser l’intégration de tous. |
-    | Réducteur.rice des contraintes | 200 | FAVEDS + Engagement | Accès à des versions simplifiées ou allégées des consignes. |
-    | Autonome | 200 | Stratégie + Engagement | Peut choisir son propre parcours ou défi. |
-    | Responsable de séance | 350 | Stratégie + Coopération + Engagement | Peut diriger une partie de la séance. |
 st.write("### 🏅 Boutique des Rôles")
 
 roles_store = {
