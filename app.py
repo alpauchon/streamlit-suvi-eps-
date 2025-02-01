@@ -44,12 +44,12 @@ if not st.session_state["accepted_rules"]:
     - Chaque élève peut se spécialiser dans **2 compétences uniquement**.
     """)
     
- ### 🏪 Boutique des rôles et pouvoirs
+  ### 🏪 Boutique des rôles et pouvoirs
     | Rôles | Points nécessaires | Compétences requises | Explication |
     |---|---|---|---|
     | Testeur.euse | 200 | FAVEDS | Peut essayer en premier les nouveaux exercices. |
     | Démonstrateur.rice | 150 | FAVEDS + Engagement | Présente les mouvements au reste du groupe. |
-    | Facilitateur.rice | 150 | Coopération + Engagement | - de répétitions imposées s’il maîtrise déjà l’exercice. |
+    | Facilitateur.rice | 150 | Coopération + Engagement | Moins de répétitions imposées s’il maîtrise déjà l’exercice. |
     | Créateur.rice de règles | 250 | Stratégie | Peut modifier certaines règles des exercices. |
     | Meneur.euse tactique | 250 | Stratégie + Coopération | Oriente une équipe et propose des stratégies. |
     | Arbitre / Régulateur.rice | 300 | Stratégie + Engagement | Aide à gérer les litiges et les décisions collectives. |
