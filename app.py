@@ -40,6 +40,25 @@ if not st.session_state["accepted_rules"]:
         st.session_state["accepted_rules"] = True
     st.stop()
 
+# Ajout d'un élève
+st.title("➕ Ajouter un élève")
+nom = st.text_input("Nom de l'élève")
+niveau = st.number_input("Niveau de départ", min_value=0, max_value=10, step=1)
+points_comp = niveau * 5
+faveds = st.number_input("FAVEDS 🤸", min_value=0, max_value=points_comp, step=1)
+strategie = st.number_input("Stratégie 🧠", min_value=0, max_value=points_comp - faveds, step=1)
+cooperation = st.number_input("Coopération 🤝", min_value=0, max_value=points_comp - faveds - strategie, step=1)
+engagement = points_comp - faveds - strategie - cooperation
+
+if st.button("Ajouter l'élève") and nom:
+    new_data = pd.DataFrame({
+        "Nom": [nom], "Niveau": [niveau], "Points de Compétence": [points_comp],
+        "FAVEDS 🤸": [faveds], "Stratégie 🧠": [strategie], "Coopération 🤝": [cooperation], "Engagement 🌟": [engagement], "Rôles": ["Apprenti(e)"], "Pouvoirs": [""]
+    })
+    st.session_state["students"] = pd.concat([st.session_state["students"], new_data], ignore_index=True)
+    save_data(st.session_state["students"])
+    st.success(f"✅ {nom} ajouté avec niveau {niveau} et répartition des points complétée.")
+
 # Affichage du tableau général
 st.title("📊 Suivi Général des Élèves")
 st.markdown("**Modifiez directement les valeurs dans le tableau ci-dessous.**")
@@ -73,23 +92,3 @@ if not st.session_state["students"].empty:
             st.session_state["students"].loc[st.session_state["students"]["Nom"] == selected_student, ["FAVEDS 🤸", "Stratégie 🧠", "Coopération 🤝", "Engagement 🌟"]] = [faveds, strategie, cooperation, engagement]
             save_data(st.session_state["students"])
             st.success(f"✅ Compétences mises à jour pour {selected_student}.")
-        
-        # Boutiques
-        st.write("### 🛒 Boutique des Pouvoirs")
-        store_items = {
-            "Le malin / la maligne": 40,
-            "Choix d’un jeu (5 min) ou donner 20 niveaux": 50,
-            "Maître des groupes (1h30) ou doubler points de compétence": 100,
-            "Maître du thème d’une séance": 150,
-            "Roi / Reine de la séquence": 300
-        }
-        selected_item = st.selectbox("🛍️ Choisir un pouvoir", list(store_items.keys()))
-        if st.button("Acheter"):
-            cost = store_items[selected_item]
-            if student_data["Niveau"] >= cost:
-                st.session_state["students"].loc[st.session_state["students"]["Nom"] == selected_student, "Niveau"] -= cost
-                st.session_state["students"].loc[st.session_state["students"]["Nom"] == selected_student, "Pouvoirs"] += f", {selected_item}" if student_data["Pouvoirs"] else selected_item
-                save_data(st.session_state["students"])
-                st.success(f"🛍️ {selected_student} a acheté '{selected_item}'.")
-            else:
-                st.error("❌ Niveaux insuffisants !")
