@@ -19,13 +19,13 @@ def check_password():
             st.error("❌ Code incorrect, essayez encore.")
 
 if not st.session_state["authenticated"]:
-    st.title("🔒 Accès Restreint")
+    st.title("🔒 Espace sécurisé")
     check_password()
     st.stop()
 
 # 🔄 Affichage des règles après authentification
 if not st.session_state["accepted_rules"]:
-    st.title("📜 Règles du Jeu")
+    st.title("📜 Système")
     st.markdown("""
     - L’élève peut gagner **4 niveaux** par séance de 45 minutes.
       - **1 niveau** pour le fair-play.
@@ -142,9 +142,9 @@ if not st.session_state["accepted_rules"]:
     st.stop()
 
 # Ajout d'un élève
-st.title("➕ Ajouter un élève")
-nom = st.text_input("Nom de l'élève")
-niveau = st.number_input("Niveau de départ", min_value=0, max_value=10, step=1)
+st.title("➕ Ajout des participant.es")
+nom = st.text_input("Nom")
+niveau = st.number_input("Niveau de départ", min_value=0, max_value=10000, step=1)
 points_comp = niveau * 5
 
 # Allocation de points librement entre les compétences
