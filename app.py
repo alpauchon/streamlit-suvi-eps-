@@ -279,10 +279,9 @@ elif choice == "Ajouter Élève":
                 [st.session_state["students"], new_data],
                 ignore_index=True
             )
+            # Reconvertir les colonnes numériques après ajout
             for col in ["Niveau", "Points de Compétence", "FAVEDS 🤸", "Stratégie 🧠", "Coopération 🤝", "Engagement 🌟"]:
-                st.session_state["students"][col] = pd.to_numeric(
-                    st.session_state["students"][col], errors="coerce"
-                ).fillna(0).astype(int)
+                st.session_state["students"][col] = pd.to_numeric(st.session_state["students"][col], errors="coerce").fillna(0).astype(int)
             save_data(st.session_state["students"])
             st.success(f"✅ {nom} ajouté avec niveau {niveau} et répartition des points complétée.")
         st.markdown('</div>', unsafe_allow_html=True)
@@ -294,6 +293,15 @@ elif choice == "Tableau de progression":
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.header("📊 Tableau de progression")
     st.markdown("**Modifiez directement les valeurs dans le tableau ci-dessous.**")
+    # Validation de la somme des points de compétences pour chaque élève
+    def validate_competences(df):
+        invalid = []
+        for idx, row in df.iterrows():
+            total_comp = row["FAVEDS 🤸"] + row["Stratégie 🧠"] + row["Coopération 🤝"] + row["Engagement 🌟"]
+            if total_comp > row["Points de Compétence"]:
+                invalid.append(row["Nom"])
+        return invalid
+
     if st.session_state["role"] == "teacher":
         edited_df = st.data_editor(
             st.session_state["students"],
@@ -302,9 +310,13 @@ elif choice == "Tableau de progression":
             key="editor_teacher"
         )
         if st.button("Enregistrer modifications", key="save_teacher"):
-            st.session_state["students"] = edited_df
-            save_data(st.session_state["students"])
-            st.success("Modifications enregistrées.")
+            invalid_rows = validate_competences(edited_df)
+            if invalid_rows:
+                st.error(f"Erreur : les élèves suivants ont une somme de compétences supérieure aux points disponibles : {', '.join(invalid_rows)}")
+            else:
+                st.session_state["students"] = edited_df
+                save_data(st.session_state["students"])
+                st.success("Modifications enregistrées.")
     else:
         my_data = st.session_state["students"][st.session_state["students"]["Nom"] == st.session_state["user"]]
         edited_my_data = st.data_editor(
@@ -313,13 +325,18 @@ elif choice == "Tableau de progression":
             key="editor_student"
         )
         if st.button("Enregistrer modifications", key="save_student"):
-            df = st.session_state["students"].copy()
-            idx = df.index[df["Nom"] == st.session_state["user"]]
-            if len(idx) > 0:
-                df.loc[idx] = edited_my_data.iloc[0]
-            st.session_state["students"] = df
-            save_data(st.session_state["students"])
-            st.success("Vos modifications ont été enregistrées.")
+            # Vérifier pour la ligne de l'élève connecté
+            invalid_rows = validate_competences(edited_my_data)
+            if invalid_rows:
+                st.error("Erreur : la somme de vos points de compétences dépasse vos points disponibles.")
+            else:
+                df = st.session_state["students"].copy()
+                idx = df.index[df["Nom"] == st.session_state["user"]]
+                if len(idx) > 0:
+                    df.loc[idx] = edited_my_data.iloc[0]
+                st.session_state["students"] = df
+                save_data(st.session_state["students"])
+                st.success("Vos modifications ont été enregistrées.")
     st.markdown('</div>', unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
