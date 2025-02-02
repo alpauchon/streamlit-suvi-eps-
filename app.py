@@ -41,6 +41,17 @@ h1, h2, h3 {
 """, unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
+# Fonction utilitaire pour redémarrer l'application
+# -----------------------------------------------------------------------------
+def rerun_app():
+    if hasattr(st, "experimental_rerun"):
+        st.experimental_rerun()
+    elif hasattr(st, "rerun"):
+        st.rerun()
+    else:
+        st.error("La fonction de redémarrage automatique n'est pas disponible. Veuillez mettre à jour Streamlit.")
+
+# -----------------------------------------------------------------------------
 # Initialisation des variables de session
 # -----------------------------------------------------------------------------
 if "authenticated" not in st.session_state:
@@ -57,7 +68,7 @@ def check_password():
         if user_password == st.secrets["ACCESS_CODE"]:
             st.session_state["authenticated"] = True
             st.success("✅ Accès autorisé !")
-            st.experimental_rerun()
+            rerun_app()  # Utilise la fonction utilitaire pour redémarrer l'app
         else:
             st.error("❌ Code incorrect, essayez encore.")
 
@@ -111,7 +122,7 @@ if not st.session_state["accepted_rules"]:
     """)
     if st.button("OK, j'ai compris les règles"):
         st.session_state["accepted_rules"] = True
-        st.experimental_rerun()
+        rerun_app()
     st.markdown('</div>', unsafe_allow_html=True)
     st.stop()
 
@@ -289,16 +300,16 @@ elif choice == "Fiche Élève":
                 }
                 selected_role = st.selectbox("🎭 Choisir un rôle", list(roles_store.keys()), key="roles")
                 role_cost = roles_store[selected_role]["Coût"]
-                required_competences = roles_store[selected_role]["Compétences Requises"]
-                st.info(f"💰 Coût: {role_cost} points de compétence\n\n🔹 Compétences requises: {', '.join(required_competences)}")
+                required_compétences = roles_store[selected_role]["Compétences Requises"]
+                st.info(f"💰 Coût: {role_cost} points de compétence\n\n🔹 Compétences requises: {', '.join(required_compétences)}")
                 if st.button("Acquérir ce rôle", key="acheter_role"):
-                    student_competences = {
+                    student_compétences = {
                         "FAVEDS 🤸": student_data["FAVEDS 🤸"],
                         "Stratégie 🧠": student_data["Stratégie 🧠"],
                         "Coopération 🤝": student_data["Coopération 🤝"],
                         "Engagement 🌟": student_data["Engagement 🌟"]
                     }
-                    if student_data["Points de Compétence"] >= role_cost and all(student_competences[comp] > 0 for comp in required_competences):
+                    if student_data["Points de Compétence"] >= role_cost and all(student_compétences[comp] > 0 for comp in required_compétences):
                         st.session_state["students"].loc[
                             st.session_state["students"]["Nom"] == selected_student, "Points de Compétence"
                         ] -= role_cost
