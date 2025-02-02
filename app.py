@@ -169,7 +169,7 @@ if st.button("Ajouter l'élève") and nom:
     st.success(f"✅ {nom} ajouté avec niveau {niveau} et répartition des points complétée.")
 
 # Affichage du tableau général
-st.title("📊 Suivi Général des Élèves")
+st.title("📊 Tableau de progression")
 st.markdown("**Modifiez directement les valeurs dans le tableau ci-dessous.**")
 if not st.session_state["students"].empty:
     st.session_state["students"] = st.data_editor(st.session_state["students"], num_rows="dynamic", use_container_width=True).fillna("")
