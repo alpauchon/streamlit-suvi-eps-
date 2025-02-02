@@ -216,7 +216,19 @@ if choice == "Accueil":
     st.header("Bienvenue sur le Suivi EPS 🏆")
     st.write("Utilisez le menu à gauche pour naviguer entre les différentes sections de l'application.")
     st.markdown(f"**Mode d'accès :** {st.session_state['role'].capitalize()} ({st.session_state['user']})")
+    
+    # Affichage du bouton de téléchargement uniquement pour l'enseignant
+    if st.session_state["role"] == "teacher":
+        if st.download_button(
+            "Télécharger le fichier CSV",
+            data=st.session_state["students"].to_csv(index=False),
+            file_name="students_data.csv",
+            mime="text/csv"
+        ):
+            st.success("Fichier téléchargé.")
+
     st.markdown('</div>', unsafe_allow_html=True)
+
 
 # -----------------------------------------------------------------------------
 # Page d'ajout d'élève (réservée aux enseignants)
