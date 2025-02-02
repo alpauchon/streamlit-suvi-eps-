@@ -293,7 +293,7 @@ elif choice == "Tableau de progression":
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.header("📊 Tableau de progression")
     st.markdown("**Modifiez directement les valeurs dans le tableau ci-dessous.**")
-    # Validation de la somme des points de compétences pour chaque élève
+    # Fonction de validation de la somme des points attribués aux compétences
     def validate_competences(df):
         invalid = []
         for idx, row in df.iterrows():
@@ -325,7 +325,6 @@ elif choice == "Tableau de progression":
             key="editor_student"
         )
         if st.button("Enregistrer modifications", key="save_student"):
-            # Vérifier pour la ligne de l'élève connecté
             invalid_rows = validate_competences(edited_my_data)
             if invalid_rows:
                 st.error("Erreur : la somme de vos points de compétences dépasse vos points disponibles.")
@@ -333,7 +332,8 @@ elif choice == "Tableau de progression":
                 df = st.session_state["students"].copy()
                 idx = df.index[df["Nom"] == st.session_state["user"]]
                 if len(idx) > 0:
-                    df.loc[idx] = edited_my_data.iloc[0]
+                    # Remplacer uniquement la ligne de l'élève en utilisant idx[0]
+                    df.loc[idx[0]] = edited_my_data.iloc[0]
                 st.session_state["students"] = df
                 save_data(st.session_state["students"])
                 st.success("Vos modifications ont été enregistrées.")
