@@ -267,6 +267,12 @@ elif choice == "Ajouter Élève":
             st.success(f"✅ {nom} ajouté avec niveau {niveau} et répartition des points complétée.")
         st.markdown('</div>', unsafe_allow_html=True)
 
+# Ajoutez ce bloc dans votre application, par exemple dans la page "Accueil"
+if st.button("Télécharger le fichier CSV"):
+    csv = st.session_state["students"].to_csv(index=False)
+    st.download_button("Cliquez ici pour télécharger", data=csv, file_name="students_data.csv", mime="text/csv")
+
+
 # -----------------------------------------------------------------------------
 # Page du tableau de progression
 # -----------------------------------------------------------------------------
