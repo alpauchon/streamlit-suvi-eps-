@@ -102,8 +102,8 @@ if "accepted_rules" not in st.session_state:
 # -----------------------------------------------------------------------------
 if st.session_state["role"] is None:
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.title("Accès spécialisé")
-    access_mode = st.radio("Choisissez votre mode d'accès", options=["Enseignant", "Élève"])
+    st.title("Page d'accès")
+    access_mode = st.radio("Choisissez votre rôle", options=["Enseignant", "Élève"])
     if access_mode == "Enseignant":
         teacher_password = st.text_input("Entrez le code d'accès enseignant :", type="password")
         if st.button("Se connecter comme enseignant"):
@@ -156,7 +156,7 @@ if st.session_state["role"] is None:
 # -----------------------------------------------------------------------------
 if not st.session_state["accepted_rules"]:
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.title("📜 Règles du Jeu")
+    st.title("📜 Règles du système")
     st.markdown("""
     - L’élève peut gagner **4 niveaux** par séance de 45 minutes.
       - **1 niveau** pour le fair-play.
@@ -166,6 +166,7 @@ if not st.session_state["accepted_rules"]:
     - Tous les élèves commencent avec le rôle **d’Apprenti(e)**.
     - **1 niveau = 5 points de compétences** à répartir librement.
     - Chaque élève peut se spécialiser dans **2 compétences uniquement**.
+    - L'élève peut acheter des pouvoirs ou des rôles à l'aide de ses niveaux et compétences.
     
        ### 🏪 Boutique des rôles et pouvoirs
     | Rôles | Points nécessaires | Compétences requises | Explication |
