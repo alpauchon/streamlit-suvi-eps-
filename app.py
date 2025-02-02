@@ -59,9 +59,12 @@ def load_data():
         df = pd.read_csv("students_data.csv")
         if df.empty:
             raise FileNotFoundError
-        # Si la colonne "StudentCode" n'existe pas, on la crée avec des valeurs vides
+        # Si la colonne "StudentCode" n'existe pas, on la crée avec des valeurs vides,
+        # sinon on remplace les valeurs manquantes par ""
         if "StudentCode" not in df.columns:
             df["StudentCode"] = ""
+        else:
+            df["StudentCode"] = df["StudentCode"].fillna("")
         # Assurer que "Pouvoirs" est de type chaîne
         df["Pouvoirs"] = df["Pouvoirs"].astype(str)
         # Conversion forcée des colonnes numériques
