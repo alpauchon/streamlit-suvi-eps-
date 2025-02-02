@@ -244,23 +244,32 @@ elif choice == "Tableau de progression":
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.header("📊 Tableau de progression")
     st.markdown("**Modifiez directement les valeurs dans le tableau ci-dessous.**")
-    edited_df = st.data_editor(
-        st.session_state["students"],
-        num_rows="dynamic",
-        use_container_width=True,
-        key="editor"
-    )
-    if st.button("Enregistrer modifications"):
-        if st.session_state["role"] == "teacher":
+    if st.session_state["role"] == "teacher":
+        # Enseignant voit et édite l'intégralité du tableau
+        edited_df = st.data_editor(
+            st.session_state["students"],
+            num_rows="dynamic",
+            use_container_width=True,
+            key="editor_teacher"
+        )
+        if st.button("Enregistrer modifications"):
             st.session_state["students"] = edited_df
             save_data(st.session_state["students"])
             st.success("Modifications enregistrées.")
-        else:
-            # Pour un élève, n'enregistrer que sa propre ligne
+    else:
+        # Pour l'élève, on affiche uniquement sa propre ligne
+        my_data = st.session_state["students"][st.session_state["students"]["Nom"] == st.session_state["user"]]
+        edited_my_data = st.data_editor(
+            my_data,
+            use_container_width=True,
+            key="editor_student"
+        )
+        if st.button("Enregistrer modifications"):
             df = st.session_state["students"].copy()
             idx = df.index[df["Nom"] == st.session_state["user"]]
             if len(idx) > 0:
-                df.loc[idx] = edited_df.loc[idx]
+                # Remplacer uniquement la ligne de l'élève
+                df.loc[idx] = edited_my_data.iloc[0]
             st.session_state["students"] = df
             save_data(st.session_state["students"])
             st.success("Vos modifications ont été enregistrées.")
