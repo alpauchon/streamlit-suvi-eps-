@@ -52,42 +52,78 @@ def rerun_app():
         st.error("La fonction de redémarrage automatique n'est pas disponible. Veuillez mettre à jour Streamlit.")
 
 # -----------------------------------------------------------------------------
-# Initialisation des variables de session pour l'authentification
+# Chargement des données
 # -----------------------------------------------------------------------------
-if "authenticated" not in st.session_state:
-    st.session_state["authenticated"] = False
-if "accepted_rules" not in st.session_state:
-    st.session_state["accepted_rules"] = False
+def load_data():
+    try:
+        df = pd.read_csv("students_data.csv")
+        if df.empty:
+            raise FileNotFoundError
+        # Assurer que "Pouvoirs" est de type chaîne
+        df["Pouvoirs"] = df["Pouvoirs"].astype(str)
+        # Conversion forcée des colonnes numériques
+        for col in ["Niveau", "Points de Compétence", "FAVEDS 🤸", "Stratégie 🧠", "Coopération 🤝", "Engagement 🌟"]:
+            df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0).astype(int)
+        print("[INFO] Données chargées avec succès.")
+        return df
+    except FileNotFoundError:
+        print("[WARNING] Fichier non trouvé, création d'un nouveau DataFrame.")
+        return pd.DataFrame({
+            "Nom": [], "Niveau": [], "Points de Compétence": [],
+            "FAVEDS 🤸": [], "Stratégie 🧠": [], "Coopération 🤝": [], "Engagement 🌟": [],
+            "Rôles": [], "Pouvoirs": []
+        })
+
+def save_data(df):
+    df.to_csv("students_data.csv", index=False)
+    print("[INFO] Données sauvegardées.")
+
+if "students" not in st.session_state:
+    st.session_state["students"] = load_data()
+
+# -----------------------------------------------------------------------------
+# Initialisation des variables de session pour l'accès spécialisé
+# -----------------------------------------------------------------------------
+# Ces variables permettront de distinguer entre un enseignant et un élève.
 if "role" not in st.session_state:
     st.session_state["role"] = None
 if "user" not in st.session_state:
     st.session_state["user"] = None
+if "accepted_rules" not in st.session_state:
+    st.session_state["accepted_rules"] = False
 
 # -----------------------------------------------------------------------------
-# Bloc d'authentification (pour l'enseignant)
+# Bloc d'accès spécialisé
 # -----------------------------------------------------------------------------
-def check_password():
-    # Cette étape est réservée à l'enseignant
-    user_password = st.text_input("🔑 Entrez le code d'accès enseignant :", type="password")
-    if st.button("Valider", key="valider_pwd"):
-        if user_password == st.secrets["ACCESS_CODE"]:
-            st.session_state["authenticated"] = True
-            st.success("✅ Accès enseignant autorisé !")
-            rerun_app()
-        else:
-            st.error("❌ Code incorrect, essayez encore.")
-
-# Si l'utilisateur n'est pas encore authentifié, on lui propose une authentification
-if not st.session_state["authenticated"]:
+if st.session_state["role"] is None:
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.title("🔒 Espace sécurisé")
-    st.info("Si vous êtes enseignant, connectez-vous avec votre code. Sinon, choisissez le mode Élève lors de l'accès spécialisé.")
-    check_password()
+    st.title("Accès spécialisé")
+    access_mode = st.radio("Choisissez votre mode d'accès", options=["Enseignant", "Élève"])
+    if access_mode == "Enseignant":
+        teacher_password = st.text_input("Entrez le code d'accès enseignant :", type="password")
+        if st.button("Se connecter comme enseignant"):
+            if teacher_password == st.secrets["ACCESS_CODE"]:
+                st.session_state["role"] = "teacher"
+                st.session_state["user"] = "Enseignant"
+                st.success("Accès enseignant autorisé.")
+                rerun_app()
+            else:
+                st.error("Code incorrect.")
+    else:  # Mode Élève
+        if st.session_state["students"].empty:
+            st.warning("Aucun élève n'est enregistré. Veuillez contacter votre enseignant.")
+        else:
+            student_name = st.selectbox("Choisissez votre nom", st.session_state["students"]["Nom"])
+            if st.button("Se connecter comme élève"):
+                st.session_state["role"] = "student"
+                st.session_state["user"] = student_name
+                st.success(f"Accès élève autorisé pour {student_name}.")
+                rerun_app()
     st.markdown('</div>', unsafe_allow_html=True)
     st.stop()
 
 # -----------------------------------------------------------------------------
-# Bloc d'acceptation des règles
+# Bloc d'acceptation des règles (commun aux deux modes)
 # -----------------------------------------------------------------------------
 if not st.session_state["accepted_rules"]:
     st.markdown('<div class="card">', unsafe_allow_html=True)
@@ -127,72 +163,18 @@ if not st.session_state["accepted_rules"]:
     | 150 | Maître.sse du thème d’une prochaine séance. |
     | 300 | Roi / Reine de la séquence (permet de choisir le prochain thème que l’on fera pour 4 à 6 cours). |
     """)
-    if st.button("OK, j'ai compris les règles", key="accepter_regles"):
+    if st.button("OK, j'ai compris les règles"):
         st.session_state["accepted_rules"] = True
         rerun_app()
     st.markdown('</div>', unsafe_allow_html=True)
     st.stop()
 
 # -----------------------------------------------------------------------------
-# Bloc de choix du mode d'accès spécialisé
-# -----------------------------------------------------------------------------
-if st.session_state["role"] is None:
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.title("Accès spécialisé")
-    access_mode = st.radio("Choisissez votre mode d'accès", options=["Enseignant", "Élève"])
-    if access_mode == "Enseignant":
-        # L'accès enseignant a déjà été validé via le code secret
-        st.session_state["role"] = "teacher"
-        st.session_state["user"] = "enseignant"
-        st.success("Accès enseignant activé.")
-    else:
-        # Pour les élèves, on leur demande de sélectionner leur nom parmi ceux enregistrés
-        if not st.session_state["students"].empty:
-            student_name = st.selectbox("Choisissez votre nom", st.session_state["students"]["Nom"])
-            st.session_state["role"] = "student"
-            st.session_state["user"] = student_name
-            st.success(f"Accès élève activé pour {student_name}.")
-        else:
-            st.warning("Aucun élève n'est enregistré. Veuillez contacter votre enseignant.")
-    st.markdown('</div>', unsafe_allow_html=True)
-    rerun_app()
-
-# -----------------------------------------------------------------------------
-# Fonctions de chargement et sauvegarde des données
-# -----------------------------------------------------------------------------
-def load_data():
-    try:
-        df = pd.read_csv("students_data.csv")
-        if df.empty:
-            raise FileNotFoundError
-        # S'assurer que "Pouvoirs" est de type chaîne
-        df["Pouvoirs"] = df["Pouvoirs"].astype(str)
-        # Conversion forcée des colonnes numériques
-        for col in ["Niveau", "Points de Compétence", "FAVEDS 🤸", "Stratégie 🧠", "Coopération 🤝", "Engagement 🌟"]:
-            df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0).astype(int)
-        print("[INFO] Données chargées avec succès.")
-        return df
-    except FileNotFoundError:
-        print("[WARNING] Fichier non trouvé, création d'un nouveau DataFrame.")
-        return pd.DataFrame({
-            "Nom": [], "Niveau": [], "Points de Compétence": [],
-            "FAVEDS 🤸": [], "Stratégie 🧠": [], "Coopération 🤝": [], "Engagement 🌟": [],
-            "Rôles": [], "Pouvoirs": []
-        })
-
-def save_data(df):
-    df.to_csv("students_data.csv", index=False)
-    print("[INFO] Données sauvegardées.")
-
-if "students" not in st.session_state:
-    st.session_state["students"] = load_data()
-
-# -----------------------------------------------------------------------------
 # Définition des pages disponibles selon le rôle
 # -----------------------------------------------------------------------------
 if st.session_state["role"] == "teacher":
     pages = ["Accueil", "Ajouter Élève", "Tableau de progression", "Fiche Élève"]
-else:  # rôle étudiant
+else:  # Mode Élève
     pages = ["Accueil", "Tableau de progression", "Fiche Élève"]
 
 choice = st.sidebar.radio("Navigation", pages)
@@ -248,7 +230,7 @@ elif choice == "Ajouter Élève":
                 [st.session_state["students"], new_data],
                 ignore_index=True
             )
-            # Conversion des colonnes numériques après concaténation
+            # Reconvertir les colonnes numériques après ajout
             for col in ["Niveau", "Points de Compétence", "FAVEDS 🤸", "Stratégie 🧠", "Coopération 🤝", "Engagement 🌟"]:
                 st.session_state["students"][col] = pd.to_numeric(st.session_state["students"][col], errors="coerce").fillna(0).astype(int)
             save_data(st.session_state["students"])
@@ -262,21 +244,19 @@ elif choice == "Tableau de progression":
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.header("📊 Tableau de progression")
     st.markdown("**Modifiez directement les valeurs dans le tableau ci-dessous.**")
-    # Affichage de l'éditeur de données
     edited_df = st.data_editor(
         st.session_state["students"],
         num_rows="dynamic",
         use_container_width=True,
         key="editor"
     )
-    # Bouton pour enregistrer les modifications
     if st.button("Enregistrer modifications"):
         if st.session_state["role"] == "teacher":
             st.session_state["students"] = edited_df
             save_data(st.session_state["students"])
             st.success("Modifications enregistrées.")
         else:
-            # Pour un élève, n'autoriser la modification que de sa propre ligne
+            # Pour un élève, n'enregistrer que sa propre ligne
             df = st.session_state["students"].copy()
             idx = df.index[df["Nom"] == st.session_state["user"]]
             if len(idx) > 0:
@@ -292,11 +272,9 @@ elif choice == "Tableau de progression":
 elif choice == "Fiche Élève":
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.header("🔍 Fiche de l'élève")
-    # Si l'utilisateur est enseignant, il peut choisir n'importe quel élève
     if st.session_state["role"] == "teacher":
         selected_student = st.selectbox("Choisir un élève", st.session_state["students"]["Nom"])
     else:
-        # Pour un élève, forcer l'accès à sa fiche uniquement
         selected_student = st.session_state["user"]
         st.info(f"Vous êtes connecté(e) en tant que {selected_student}.")
     
@@ -315,7 +293,6 @@ elif choice == "Fiche Élève":
             st.write(f"**Coopération 🤝 :** {student_data['Coopération 🤝']}")
             st.write(f"**Engagement 🌟 :** {student_data['Engagement 🌟']}")
         
-        # Onglets pour les boutiques
         onglets = st.tabs(["🛒 Boutique des Pouvoirs", "🏅 Boutique des Rôles"])
         
         with onglets[0]:
@@ -332,7 +309,6 @@ elif choice == "Fiche Élève":
             st.info(f"💰 Coût: {cost} niveaux")
             if st.button("Acheter ce pouvoir", key="acheter_pouvoir"):
                 if int(student_data["Niveau"]) >= cost:
-                    # Mise à jour uniquement pour la ligne de l'élève connecté
                     current_level = int(student_data["Niveau"])
                     new_level = current_level - cost
                     st.session_state["students"].loc[
