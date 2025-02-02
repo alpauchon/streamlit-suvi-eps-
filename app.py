@@ -231,11 +231,13 @@ roles_store = {
 }
     
 selected_role = st.selectbox("🎭 Choisir un rôle", list(roles_store.keys()))
-if st.button("Acquérir ce rôle"):
-    role_cost = roles_store[selected_role]["Coût"]
-    required_competences = roles_store[selected_role]["Compétences Requises"]
+role_cost = roles_store[selected_role]["Coût"]
+required_competences = roles_store[selected_role]["Compétences Requises"]
 
-    # Vérification des points de compétence et compétences requises
+# Affichage des coûts et compétences requises
+st.info(f"💰 Coût: {role_cost} points de compétence\n\n🔹 Compétences requises: {', '.join(required_competences)}")
+
+if st.button("Acquérir ce rôle"):
     student_competences = {
         "FAVEDS 🤸": student_data["FAVEDS 🤸"],
         "Stratégie 🧠": student_data["Stratégie 🧠"],
@@ -249,8 +251,6 @@ if st.button("Acquérir ce rôle"):
         nouveaux_roles = roles_anciens + ", " + selected_role if roles_anciens else selected_role
         st.session_state["students"].loc[st.session_state["students"]["Nom"] == selected_student, "Rôles"] = nouveaux_roles
         save_data(st.session_state["students"])
-        print(f"[INFO] {selected_student} a acquis le rôle {selected_role} pour {role_cost} points de compétence.")
         st.success(f"🏅 {selected_student} a acquis le rôle '{selected_role}'.")
     else:
-        print(f"[WARNING] {selected_student} n'a pas assez de points de compétence ou ne remplit pas les conditions pour acquérir {selected_role}.")
         st.error("❌ Points de compétence insuffisants ou compétences requises non atteintes !")
