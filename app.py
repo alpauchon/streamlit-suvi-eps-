@@ -68,7 +68,7 @@ def check_password():
         if user_password == st.secrets["ACCESS_CODE"]:
             st.session_state["authenticated"] = True
             st.success("✅ Accès autorisé !")
-            rerun_app()  # Utilise la fonction utilitaire pour redémarrer l'app
+            rerun_app()  # Redémarrage de l'app
         else:
             st.error("❌ Code incorrect, essayez encore.")
 
@@ -134,7 +134,7 @@ def load_data():
         df = pd.read_csv("students_data.csv")
         if df.empty:
             raise FileNotFoundError
-        # S'assurer que la colonne "Pouvoirs" est de type chaîne de caractères
+        # Assurer que "Pouvoirs" est de type chaîne
         df["Pouvoirs"] = df["Pouvoirs"].astype(str)
         # Conversion forcée des colonnes numériques
         for col in ["Niveau", "Points de Compétence", "FAVEDS 🤸", "Stratégie 🧠", "Coopération 🤝", "Engagement 🌟"]:
@@ -208,7 +208,10 @@ elif choice == "Ajouter Élève":
         st.session_state["students"] = pd.concat(
             [st.session_state["students"], new_data],
             ignore_index=True
-        ).fillna("")
+        )
+        # Assurer la conversion des colonnes numériques après concaténation
+        for col in ["Niveau", "Points de Compétence", "FAVEDS 🤸", "Stratégie 🧠", "Coopération 🤝", "Engagement 🌟"]:
+            st.session_state["students"][col] = pd.to_numeric(st.session_state["students"][col], errors="coerce").fillna(0).astype(int)
         save_data(st.session_state["students"])
         st.success(f"✅ {nom} ajouté avec niveau {niveau} et répartition des points complétée.")
     st.markdown('</div>', unsafe_allow_html=True)
@@ -225,7 +228,10 @@ elif choice == "Tableau de progression":
             st.session_state["students"],
             num_rows="dynamic",
             use_container_width=True
-        ).fillna("")
+        )
+        # Reconvertir si besoin
+        for col in ["Niveau", "Points de Compétence", "FAVEDS 🤸", "Stratégie 🧠", "Coopération 🤝", "Engagement 🌟"]:
+            st.session_state["students"][col] = pd.to_numeric(st.session_state["students"][col], errors="coerce").fillna(0).astype(int)
         save_data(st.session_state["students"])
         st.info("[INFO] Tableau des élèves mis à jour.")
     else:
@@ -272,7 +278,7 @@ elif choice == "Fiche Élève":
                 st.info(f"💰 Coût: {cost} niveaux")
                 if st.button("Acheter ce pouvoir", key="acheter_pouvoir"):
                     if int(student_data["Niveau"]) >= cost:
-                        # Récupérer le niveau actuel, soustraire le coût, puis réassigner
+                        # Récupérer la valeur actuelle, calculer et réassigner
                         current_level = int(student_data["Niveau"])
                         new_level = current_level - cost
                         st.session_state["students"].loc[
@@ -317,7 +323,6 @@ elif choice == "Fiche Élève":
                         "Engagement 🌟": int(student_data["Engagement 🌟"])
                     }
                     if int(student_data["Points de Compétence"]) >= role_cost and all(student_compétences[comp] > 0 for comp in required_compétences):
-                        # Récupérer les points actuels, soustraire le coût, puis réassigner
                         current_points = int(student_data["Points de Compétence"])
                         new_points = current_points - role_cost
                         st.session_state["students"].loc[
