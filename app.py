@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 
 # -----------------------------------------------------------------------------
-# Configuration de la page et injection de CSS personnalisé pour un design moderne
+# Configuration de la page et injection de CSS pour un design moderne
 # -----------------------------------------------------------------------------
 st.set_page_config(page_title="Suivi EPS", page_icon="🏆", layout="wide")
 
@@ -52,29 +52,36 @@ def rerun_app():
         st.error("La fonction de redémarrage automatique n'est pas disponible. Veuillez mettre à jour Streamlit.")
 
 # -----------------------------------------------------------------------------
-# Initialisation des variables de session
+# Initialisation des variables de session pour l'authentification
 # -----------------------------------------------------------------------------
 if "authenticated" not in st.session_state:
     st.session_state["authenticated"] = False
 if "accepted_rules" not in st.session_state:
     st.session_state["accepted_rules"] = False
+if "role" not in st.session_state:
+    st.session_state["role"] = None
+if "user" not in st.session_state:
+    st.session_state["user"] = None
 
 # -----------------------------------------------------------------------------
-# Bloc d'authentification
+# Bloc d'authentification (pour l'enseignant)
 # -----------------------------------------------------------------------------
 def check_password():
-    user_password = st.text_input("🔑 Entrez le code d'accès :", type="password")
-    if st.button("Valider"):
+    # Cette étape est réservée à l'enseignant
+    user_password = st.text_input("🔑 Entrez le code d'accès enseignant :", type="password")
+    if st.button("Valider", key="valider_pwd"):
         if user_password == st.secrets["ACCESS_CODE"]:
             st.session_state["authenticated"] = True
-            st.success("✅ Accès autorisé !")
-            rerun_app()  # Redémarrage de l'app
+            st.success("✅ Accès enseignant autorisé !")
+            rerun_app()
         else:
             st.error("❌ Code incorrect, essayez encore.")
 
+# Si l'utilisateur n'est pas encore authentifié, on lui propose une authentification
 if not st.session_state["authenticated"]:
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.title("🔒 Espace sécurisé")
+    st.info("Si vous êtes enseignant, connectez-vous avec votre code. Sinon, choisissez le mode Élève lors de l'accès spécialisé.")
     check_password()
     st.markdown('</div>', unsafe_allow_html=True)
     st.stop()
@@ -120,11 +127,35 @@ if not st.session_state["accepted_rules"]:
     | 150 | Maître.sse du thème d’une prochaine séance. |
     | 300 | Roi / Reine de la séquence (permet de choisir le prochain thème que l’on fera pour 4 à 6 cours). |
     """)
-    if st.button("OK, j'ai compris les règles"):
+    if st.button("OK, j'ai compris les règles", key="accepter_regles"):
         st.session_state["accepted_rules"] = True
         rerun_app()
     st.markdown('</div>', unsafe_allow_html=True)
     st.stop()
+
+# -----------------------------------------------------------------------------
+# Bloc de choix du mode d'accès spécialisé
+# -----------------------------------------------------------------------------
+if st.session_state["role"] is None:
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.title("Accès spécialisé")
+    access_mode = st.radio("Choisissez votre mode d'accès", options=["Enseignant", "Élève"])
+    if access_mode == "Enseignant":
+        # L'accès enseignant a déjà été validé via le code secret
+        st.session_state["role"] = "teacher"
+        st.session_state["user"] = "enseignant"
+        st.success("Accès enseignant activé.")
+    else:
+        # Pour les élèves, on leur demande de sélectionner leur nom parmi ceux enregistrés
+        if not st.session_state["students"].empty:
+            student_name = st.selectbox("Choisissez votre nom", st.session_state["students"]["Nom"])
+            st.session_state["role"] = "student"
+            st.session_state["user"] = student_name
+            st.success(f"Accès élève activé pour {student_name}.")
+        else:
+            st.warning("Aucun élève n'est enregistré. Veuillez contacter votre enseignant.")
+    st.markdown('</div>', unsafe_allow_html=True)
+    rerun_app()
 
 # -----------------------------------------------------------------------------
 # Fonctions de chargement et sauvegarde des données
@@ -134,7 +165,7 @@ def load_data():
         df = pd.read_csv("students_data.csv")
         if df.empty:
             raise FileNotFoundError
-        # Assurer que "Pouvoirs" est de type chaîne
+        # S'assurer que "Pouvoirs" est de type chaîne
         df["Pouvoirs"] = df["Pouvoirs"].astype(str)
         # Conversion forcée des colonnes numériques
         for col in ["Niveau", "Points de Compétence", "FAVEDS 🤸", "Stratégie 🧠", "Coopération 🤝", "Engagement 🌟"]:
@@ -157,9 +188,13 @@ if "students" not in st.session_state:
     st.session_state["students"] = load_data()
 
 # -----------------------------------------------------------------------------
-# Barre latérale de navigation
+# Définition des pages disponibles selon le rôle
 # -----------------------------------------------------------------------------
-pages = ["Accueil", "Ajouter Élève", "Tableau de progression", "Fiche Élève"]
+if st.session_state["role"] == "teacher":
+    pages = ["Accueil", "Ajouter Élève", "Tableau de progression", "Fiche Élève"]
+else:  # rôle étudiant
+    pages = ["Accueil", "Tableau de progression", "Fiche Élève"]
+
 choice = st.sidebar.radio("Navigation", pages)
 
 # -----------------------------------------------------------------------------
@@ -169,52 +204,56 @@ if choice == "Accueil":
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.header("Bienvenue sur le Suivi EPS 🏆")
     st.write("Utilisez le menu à gauche pour naviguer entre les différentes sections de l'application.")
+    st.markdown(f"**Mode d'accès :** {st.session_state['role'].capitalize()} ({st.session_state['user']})")
     st.markdown('</div>', unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# Page d'ajout d'élève
+# Page d'ajout d'élève (réservée aux enseignants)
 # -----------------------------------------------------------------------------
 elif choice == "Ajouter Élève":
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.header("➕ Ajout des participant.es")
-    with st.form("ajouter_eleve_form"):
-        nom = st.text_input("Nom")
-        niveau = st.number_input("Niveau de départ", min_value=0, max_value=10000, step=1)
-        points_comp = niveau * 5
-        st.write(f"**Points de Compétence disponibles :** {points_comp}")
-        st.markdown("### Allocation des points entre les compétences")
-        remaining_points = points_comp
-        faveds = st.number_input("FAVEDS 🤸", min_value=0, max_value=remaining_points, step=1, value=0)
-        remaining_points -= faveds
-        strategie = st.number_input("Stratégie 🧠", min_value=0, max_value=remaining_points, step=1, value=0)
-        remaining_points -= strategie
-        cooperation = st.number_input("Coopération 🤝", min_value=0, max_value=remaining_points, step=1, value=0)
-        remaining_points -= cooperation
-        engagement = st.number_input("Engagement 🌟", min_value=0, max_value=remaining_points, step=1, value=remaining_points)
-        submit_eleve = st.form_submit_button("Ajouter l'élève")
-    
-    if submit_eleve and nom:
-        new_data = pd.DataFrame({
-            "Nom": [nom],
-            "Niveau": [niveau],
-            "Points de Compétence": [points_comp],
-            "FAVEDS 🤸": [faveds],
-            "Stratégie 🧠": [strategie],
-            "Coopération 🤝": [cooperation],
-            "Engagement 🌟": [engagement],
-            "Rôles": ["Apprenti(e)"],
-            "Pouvoirs": [""]
-        })
-        st.session_state["students"] = pd.concat(
-            [st.session_state["students"], new_data],
-            ignore_index=True
-        )
-        # Assurer la conversion des colonnes numériques après concaténation
-        for col in ["Niveau", "Points de Compétence", "FAVEDS 🤸", "Stratégie 🧠", "Coopération 🤝", "Engagement 🌟"]:
-            st.session_state["students"][col] = pd.to_numeric(st.session_state["students"][col], errors="coerce").fillna(0).astype(int)
-        save_data(st.session_state["students"])
-        st.success(f"✅ {nom} ajouté avec niveau {niveau} et répartition des points complétée.")
-    st.markdown('</div>', unsafe_allow_html=True)
+    if st.session_state["role"] != "teacher":
+        st.error("Accès réservé aux enseignants.")
+    else:
+        st.markdown('<div class="card">', unsafe_allow_html=True)
+        st.header("➕ Ajout des participant.es")
+        with st.form("ajouter_eleve_form"):
+            nom = st.text_input("Nom")
+            niveau = st.number_input("Niveau de départ", min_value=0, max_value=10000, step=1)
+            points_comp = niveau * 5
+            st.write(f"**Points de Compétence disponibles :** {points_comp}")
+            st.markdown("### Allocation des points entre les compétences")
+            remaining_points = points_comp
+            faveds = st.number_input("FAVEDS 🤸", min_value=0, max_value=remaining_points, step=1, value=0)
+            remaining_points -= faveds
+            strategie = st.number_input("Stratégie 🧠", min_value=0, max_value=remaining_points, step=1, value=0)
+            remaining_points -= strategie
+            cooperation = st.number_input("Coopération 🤝", min_value=0, max_value=remaining_points, step=1, value=0)
+            remaining_points -= cooperation
+            engagement = st.number_input("Engagement 🌟", min_value=0, max_value=remaining_points, step=1, value=remaining_points)
+            submit_eleve = st.form_submit_button("Ajouter l'élève")
+        
+        if submit_eleve and nom:
+            new_data = pd.DataFrame({
+                "Nom": [nom],
+                "Niveau": [niveau],
+                "Points de Compétence": [points_comp],
+                "FAVEDS 🤸": [faveds],
+                "Stratégie 🧠": [strategie],
+                "Coopération 🤝": [cooperation],
+                "Engagement 🌟": [engagement],
+                "Rôles": ["Apprenti(e)"],
+                "Pouvoirs": [""]
+            })
+            st.session_state["students"] = pd.concat(
+                [st.session_state["students"], new_data],
+                ignore_index=True
+            )
+            # Conversion des colonnes numériques après concaténation
+            for col in ["Niveau", "Points de Compétence", "FAVEDS 🤸", "Stratégie 🧠", "Coopération 🤝", "Engagement 🌟"]:
+                st.session_state["students"][col] = pd.to_numeric(st.session_state["students"][col], errors="coerce").fillna(0).astype(int)
+            save_data(st.session_state["students"])
+            st.success(f"✅ {nom} ajouté avec niveau {niveau} et répartition des points complétée.")
+        st.markdown('</div>', unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
 # Page du tableau de progression
@@ -223,123 +262,136 @@ elif choice == "Tableau de progression":
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.header("📊 Tableau de progression")
     st.markdown("**Modifiez directement les valeurs dans le tableau ci-dessous.**")
-    if not st.session_state["students"].empty:
-        st.session_state["students"] = st.data_editor(
-            st.session_state["students"],
-            num_rows="dynamic",
-            use_container_width=True
-        )
-        # Reconvertir si besoin
-        for col in ["Niveau", "Points de Compétence", "FAVEDS 🤸", "Stratégie 🧠", "Coopération 🤝", "Engagement 🌟"]:
-            st.session_state["students"][col] = pd.to_numeric(st.session_state["students"][col], errors="coerce").fillna(0).astype(int)
-        save_data(st.session_state["students"])
-        st.info("[INFO] Tableau des élèves mis à jour.")
-    else:
-        st.warning("Aucun élève n'a encore été ajouté.")
+    # Affichage de l'éditeur de données
+    edited_df = st.data_editor(
+        st.session_state["students"],
+        num_rows="dynamic",
+        use_container_width=True,
+        key="editor"
+    )
+    # Bouton pour enregistrer les modifications
+    if st.button("Enregistrer modifications"):
+        if st.session_state["role"] == "teacher":
+            st.session_state["students"] = edited_df
+            save_data(st.session_state["students"])
+            st.success("Modifications enregistrées.")
+        else:
+            # Pour un élève, n'autoriser la modification que de sa propre ligne
+            df = st.session_state["students"].copy()
+            idx = df.index[df["Nom"] == st.session_state["user"]]
+            if len(idx) > 0:
+                df.loc[idx] = edited_df.loc[idx]
+            st.session_state["students"] = df
+            save_data(st.session_state["students"])
+            st.success("Vos modifications ont été enregistrées.")
     st.markdown('</div>', unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# Page de la fiche élève avec boutiques en onglets
+# Page de la fiche élève
 # -----------------------------------------------------------------------------
 elif choice == "Fiche Élève":
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.header("🔍 Fiche de l'élève")
-    if not st.session_state["students"].empty:
+    # Si l'utilisateur est enseignant, il peut choisir n'importe quel élève
+    if st.session_state["role"] == "teacher":
         selected_student = st.selectbox("Choisir un élève", st.session_state["students"]["Nom"])
-        if selected_student:
-            student_data = st.session_state["students"].loc[
-                st.session_state["students"]["Nom"] == selected_student
-            ].iloc[0]
-            st.subheader(f"📌 Fiche de {selected_student}")
-            col1, col2 = st.columns(2)
-            with col1:
-                st.write(f"**Niveau :** {student_data['Niveau']}")
-                st.write(f"**Points de Compétence :** {student_data['Points de Compétence']}")
-            with col2:
-                st.write(f"**FAVEDS 🤸 :** {student_data['FAVEDS 🤸']}")
-                st.write(f"**Stratégie 🧠 :** {student_data['Stratégie 🧠']}")
-                st.write(f"**Coopération 🤝 :** {student_data['Coopération 🤝']}")
-                st.write(f"**Engagement 🌟 :** {student_data['Engagement 🌟']}")
-            
-            # Séparation en onglets pour les boutiques
-            onglets = st.tabs(["🛒 Boutique des Pouvoirs", "🏅 Boutique des Rôles"])
-            
-            with onglets[0]:
-                st.markdown('<div class="card">', unsafe_allow_html=True)
-                store_items = {
-                    "Le malin / la maligne": 40,
-                    "Choix d’un jeu (5 min) ou donner 20 niveaux": 50,
-                    "Maître des groupes (1h30) ou doubler points de compétence": 100,
-                    "Maître du thème d’une séance": 150,
-                    "Roi / Reine de la séquence": 300
+    else:
+        # Pour un élève, forcer l'accès à sa fiche uniquement
+        selected_student = st.session_state["user"]
+        st.info(f"Vous êtes connecté(e) en tant que {selected_student}.")
+    
+    if selected_student:
+        student_data = st.session_state["students"].loc[
+            st.session_state["students"]["Nom"] == selected_student
+        ].iloc[0]
+        st.subheader(f"📌 Fiche de {selected_student}")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.write(f"**Niveau :** {student_data['Niveau']}")
+            st.write(f"**Points de Compétence :** {student_data['Points de Compétence']}")
+        with col2:
+            st.write(f"**FAVEDS 🤸 :** {student_data['FAVEDS 🤸']}")
+            st.write(f"**Stratégie 🧠 :** {student_data['Stratégie 🧠']}")
+            st.write(f"**Coopération 🤝 :** {student_data['Coopération 🤝']}")
+            st.write(f"**Engagement 🌟 :** {student_data['Engagement 🌟']}")
+        
+        # Onglets pour les boutiques
+        onglets = st.tabs(["🛒 Boutique des Pouvoirs", "🏅 Boutique des Rôles"])
+        
+        with onglets[0]:
+            st.markdown('<div class="card">', unsafe_allow_html=True)
+            store_items = {
+                "Le malin / la maligne": 40,
+                "Choix d’un jeu (5 min) ou donner 20 niveaux": 50,
+                "Maître des groupes (1h30) ou doubler points de compétence": 100,
+                "Maître du thème d’une séance": 150,
+                "Roi / Reine de la séquence": 300
+            }
+            selected_item = st.selectbox("🛍️ Choisir un pouvoir", list(store_items.keys()), key="pouvoirs")
+            cost = store_items[selected_item]
+            st.info(f"💰 Coût: {cost} niveaux")
+            if st.button("Acheter ce pouvoir", key="acheter_pouvoir"):
+                if int(student_data["Niveau"]) >= cost:
+                    # Mise à jour uniquement pour la ligne de l'élève connecté
+                    current_level = int(student_data["Niveau"])
+                    new_level = current_level - cost
+                    st.session_state["students"].loc[
+                        st.session_state["students"]["Nom"] == selected_student, "Niveau"
+                    ] = new_level
+                    pouvoirs_anciens = str(student_data["Pouvoirs"]) if pd.notna(student_data["Pouvoirs"]) else ""
+                    nouveaux_pouvoirs = pouvoirs_anciens + ", " + selected_item if pouvoirs_anciens else selected_item
+                    st.session_state["students"].loc[
+                        st.session_state["students"]["Nom"] == selected_student, "Pouvoirs"
+                    ] = nouveaux_pouvoirs
+                    save_data(st.session_state["students"])
+                    st.success(f"🛍️ {selected_student} a acheté '{selected_item}'.")
+                else:
+                    st.error("❌ Niveaux insuffisants !")
+            st.markdown('</div>', unsafe_allow_html=True)
+        
+        with onglets[1]:
+            st.markdown('<div class="card">', unsafe_allow_html=True)
+            roles_store = {
+                "🧪 Testeur.euse": {"Coût": 200, "Compétences Requises": ["FAVEDS 🤸"]},
+                "🎭 Démonstrateur.rice": {"Coût": 150, "Compétences Requises": ["FAVEDS 🤸", "Engagement 🌟"]},
+                "🔧 Facilitateur.rice": {"Coût": 150, "Compétences Requises": ["Coopération 🤝", "Engagement 🌟"]},
+                "⚖️ Créateur.rice de règles": {"Coût": 250, "Compétences Requises": ["Stratégie 🧠"]},
+                "🎯 Meneur.euse tactique": {"Coût": 250, "Compétences Requises": ["Stratégie 🧠", "Coopération 🤝"]},
+                "⚖️ Arbitre / Régulateur.rice": {"Coût": 300, "Compétences Requises": ["Stratégie 🧠", "Engagement 🌟"]},
+                "🤝 Aide-Coach": {"Coût": 250, "Compétences Requises": ["Coopération 🤝", "Engagement 🌟"]},
+                "📋 Coordinateur.rice de groupe": {"Coût": 300, "Compétences Requises": ["Coopération 🤝"]},
+                "🌍 Facilitateur.rice (social)": {"Coût": 250, "Compétences Requises": ["Coopération 🤝", "Engagement 🌟"]},
+                "⚡ Réducteur.rice des contraintes": {"Coût": 200, "Compétences Requises": ["FAVEDS 🤸", "Engagement 🌟"]},
+                "🛤️ Autonome": {"Coût": 200, "Compétences Requises": ["Stratégie 🧠", "Engagement 🌟"]},
+                "🏆 Responsable de séance": {"Coût": 350, "Compétences Requises": ["Stratégie 🧠", "Coopération 🤝", "Engagement 🌟"]}
+            }
+            selected_role = st.selectbox("🎭 Choisir un rôle", list(roles_store.keys()), key="roles")
+            role_cost = roles_store[selected_role]["Coût"]
+            required_compétences = roles_store[selected_role]["Compétences Requises"]
+            st.info(f"💰 Coût: {role_cost} points de compétence\n\n🔹 Compétences requises: {', '.join(required_compétences)}")
+            if st.button("Acquérir ce rôle", key="acheter_role"):
+                student_compétences = {
+                    "FAVEDS 🤸": int(student_data["FAVEDS 🤸"]),
+                    "Stratégie 🧠": int(student_data["Stratégie 🧠"]),
+                    "Coopération 🤝": int(student_data["Coopération 🤝"]),
+                    "Engagement 🌟": int(student_data["Engagement 🌟"])
                 }
-                selected_item = st.selectbox("🛍️ Choisir un pouvoir", list(store_items.keys()), key="pouvoirs")
-                cost = store_items[selected_item]
-                st.info(f"💰 Coût: {cost} niveaux")
-                if st.button("Acheter ce pouvoir", key="acheter_pouvoir"):
-                    if int(student_data["Niveau"]) >= cost:
-                        # Récupérer la valeur actuelle, calculer et réassigner
-                        current_level = int(student_data["Niveau"])
-                        new_level = current_level - cost
-                        st.session_state["students"].loc[
-                            st.session_state["students"]["Nom"] == selected_student, "Niveau"
-                        ] = new_level
-                        pouvoirs_anciens = str(student_data["Pouvoirs"]) if pd.notna(student_data["Pouvoirs"]) else ""
-                        nouveaux_pouvoirs = pouvoirs_anciens + ", " + selected_item if pouvoirs_anciens else selected_item
-                        st.session_state["students"].loc[
-                            st.session_state["students"]["Nom"] == selected_student, "Pouvoirs"
-                        ] = nouveaux_pouvoirs
-                        save_data(st.session_state["students"])
-                        st.success(f"🛍️ {selected_student} a acheté '{selected_item}'.")
-                    else:
-                        st.error("❌ Niveaux insuffisants !")
-                st.markdown('</div>', unsafe_allow_html=True)
-            
-            with onglets[1]:
-                st.markdown('<div class="card">', unsafe_allow_html=True)
-                roles_store = {
-                    "🧪 Testeur.euse": {"Coût": 200, "Compétences Requises": ["FAVEDS 🤸"]},
-                    "🎭 Démonstrateur.rice": {"Coût": 150, "Compétences Requises": ["FAVEDS 🤸", "Engagement 🌟"]},
-                    "🔧 Facilitateur.rice": {"Coût": 150, "Compétences Requises": ["Coopération 🤝", "Engagement 🌟"]},
-                    "⚖️ Créateur.rice de règles": {"Coût": 250, "Compétences Requises": ["Stratégie 🧠"]},
-                    "🎯 Meneur.euse tactique": {"Coût": 250, "Compétences Requises": ["Stratégie 🧠", "Coopération 🤝"]},
-                    "⚖️ Arbitre / Régulateur.rice": {"Coût": 300, "Compétences Requises": ["Stratégie 🧠", "Engagement 🌟"]},
-                    "🤝 Aide-Coach": {"Coût": 250, "Compétences Requises": ["Coopération 🤝", "Engagement 🌟"]},
-                    "📋 Coordinateur.rice de groupe": {"Coût": 300, "Compétences Requises": ["Coopération 🤝"]},
-                    "🌍 Facilitateur.rice (social)": {"Coût": 250, "Compétences Requises": ["Coopération 🤝", "Engagement 🌟"]},
-                    "⚡ Réducteur.rice des contraintes": {"Coût": 200, "Compétences Requises": ["FAVEDS 🤸", "Engagement 🌟"]},
-                    "🛤️ Autonome": {"Coût": 200, "Compétences Requises": ["Stratégie 🧠", "Engagement 🌟"]},
-                    "🏆 Responsable de séance": {"Coût": 350, "Compétences Requises": ["Stratégie 🧠", "Coopération 🤝", "Engagement 🌟"]}
-                }
-                selected_role = st.selectbox("🎭 Choisir un rôle", list(roles_store.keys()), key="roles")
-                role_cost = roles_store[selected_role]["Coût"]
-                required_compétences = roles_store[selected_role]["Compétences Requises"]
-                st.info(f"💰 Coût: {role_cost} points de compétence\n\n🔹 Compétences requises: {', '.join(required_compétences)}")
-                if st.button("Acquérir ce rôle", key="acheter_role"):
-                    student_compétences = {
-                        "FAVEDS 🤸": int(student_data["FAVEDS 🤸"]),
-                        "Stratégie 🧠": int(student_data["Stratégie 🧠"]),
-                        "Coopération 🤝": int(student_data["Coopération 🤝"]),
-                        "Engagement 🌟": int(student_data["Engagement 🌟"])
-                    }
-                    if int(student_data["Points de Compétence"]) >= role_cost and all(student_compétences[comp] > 0 for comp in required_compétences):
-                        current_points = int(student_data["Points de Compétence"])
-                        new_points = current_points - role_cost
-                        st.session_state["students"].loc[
-                            st.session_state["students"]["Nom"] == selected_student, "Points de Compétence"
-                        ] = new_points
-                        roles_anciens = str(student_data["Rôles"]) if pd.notna(student_data["Rôles"]) else ""
-                        nouveaux_roles = roles_anciens + ", " + selected_role if roles_anciens else selected_role
-                        st.session_state["students"].loc[
-                            st.session_state["students"]["Nom"] == selected_student, "Rôles"
-                        ] = nouveaux_roles
-                        save_data(st.session_state["students"])
-                        st.success(f"🏅 {selected_student} a acquis le rôle '{selected_role}'.")
-                    else:
-                        st.error("❌ Points de compétence insuffisants ou compétences requises non atteintes !")
-                st.markdown('</div>', unsafe_allow_html=True)
-        else:
-            st.warning("Veuillez sélectionner un élève.")
+                if int(student_data["Points de Compétence"]) >= role_cost and all(student_compétences[comp] > 0 for comp in required_compétences):
+                    current_points = int(student_data["Points de Compétence"])
+                    new_points = current_points - role_cost
+                    st.session_state["students"].loc[
+                        st.session_state["students"]["Nom"] == selected_student, "Points de Compétence"
+                    ] = new_points
+                    roles_anciens = str(student_data["Rôles"]) if pd.notna(student_data["Rôles"]) else ""
+                    nouveaux_roles = roles_anciens + ", " + selected_role if roles_anciens else selected_role
+                    st.session_state["students"].loc[
+                        st.session_state["students"]["Nom"] == selected_student, "Rôles"
+                    ] = nouveaux_roles
+                    save_data(st.session_state["students"])
+                    st.success(f"🏅 {selected_student} a acquis le rôle '{selected_role}'.")
+                else:
+                    st.error("❌ Points de compétence insuffisants ou compétences requises non atteintes !")
+            st.markdown('</div>', unsafe_allow_html=True)
     else:
         st.warning("Aucun élève n'a encore été ajouté. Veuillez ajouter un élève dans la section 'Ajouter Élève'.")
     st.markdown('</div>', unsafe_allow_html=True)
