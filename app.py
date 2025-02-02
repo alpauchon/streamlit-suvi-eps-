@@ -211,21 +211,6 @@ if not st.session_state["students"].empty:
             else:
                 print(f"[WARNING] {selected_student} n'a pas assez de niveaux pour acheter {selected_item}.")
                 st.error("❌ Niveaux insuffisants !")
-      
-        selected_item = st.selectbox("🛍️ Choisir un pouvoir", list(store_items.keys()))
-        if st.button("Acheter"):
-            cost = store_items[selected_item]
-            if student_data["Niveau"] >= cost:
-                st.session_state["students"].loc[st.session_state["students"]["Nom"] == selected_student, "Niveau"] -= cost
-                pouvoirs_anciens = str(student_data["Pouvoirs"]) if pd.notna(student_data["Pouvoirs"]) else ""
-                nouveaux_pouvoirs = pouvoirs_anciens + ", " + selected_item if pouvoirs_anciens else selected_item
-                st.session_state["students"].loc[st.session_state["students"]["Nom"] == selected_student, "Pouvoirs"] = nouveaux_pouvoirs
-                save_data(st.session_state["students"])
-                print(f"[INFO] {selected_student} a acheté {selected_item} pour {cost} niveaux.")
-                st.success(f"🛍️ {selected_student} a acheté '{selected_item}'.")
-            else:
-                print(f"[WARNING] {selected_student} n'a pas assez de niveaux pour acheter {selected_item}.")
-                st.error("❌ Niveaux insuffisants !")
               
 # 🏅 Boutique des Rôles
 st.write("### 🏅 Boutique des Rôles")
