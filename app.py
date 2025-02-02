@@ -1,18 +1,20 @@
 import streamlit as st
 import pandas as pd
 
-# 🔐 Vérification du code d'accès
+# 🔐 Vérification du code d'accès et gestion des règles du jeu
 if "authenticated" not in st.session_state:
     st.session_state["authenticated"] = False
+if "accepted_rules" not in st.session_state:
+    st.session_state["accepted_rules"] = False
 
 def check_password():
-    """Vérifie si le mot de passe entré est correct"""
+    """Vérifie si le mot de passe entré est correct et passe aux règles du jeu"""
     user_password = st.text_input("🔑 Entrez le code d'accès :", type="password")
     if st.button("Valider"):
         if user_password == st.secrets["ACCESS_CODE"]:
             st.session_state["authenticated"] = True
             st.success("✅ Accès autorisé !")
-            st.experimental_rerun()
+            st.rerun()  # Redémarre l'app proprement sans erreurs
         else:
             st.error("❌ Code incorrect, essayez encore.")
 
@@ -20,6 +22,29 @@ if not st.session_state["authenticated"]:
     st.title("🔒 Accès Restreint")
     check_password()
     st.stop()
+
+# 🔄 Affichage des règles après authentification
+if not st.session_state["accepted_rules"]:
+    st.title("📜 Règles du Jeu")
+    st.markdown("""
+    - L’élève peut gagner **4 niveaux** par séance de 45 minutes.
+      - **1 niveau** pour le fair-play.
+      - **1 niveau** pour le respect.
+      - **1 niveau** pour l’investissement.
+      - **1 niveau** pour l’atteinte des objectifs du cours.
+    - Tous les élèves commencent avec le rôle **d’Apprenti(e)**.
+    - **1 niveau = 5 points de compétences** à répartir librement.
+    - Chaque élève peut se spécialiser dans **2 compétences uniquement**.
+
+    ### 🏪 Boutique des rôles et pouvoirs
+    ...
+    """)
+    
+    if st.button("OK, j'ai compris les règles"):
+        st.session_state["accepted_rules"] = True
+        st.rerun()  # Recharge l'application pour afficher la suite
+    st.stop()
+
 
 
 # Configuration générale de l'application
