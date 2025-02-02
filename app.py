@@ -134,7 +134,7 @@ def load_data():
         df = pd.read_csv("students_data.csv")
         if df.empty:
             raise FileNotFoundError
-        # Assurer que la colonne "Pouvoirs" est de type chaîne de caractères
+        # S'assurer que la colonne "Pouvoirs" est de type chaîne de caractères
         df["Pouvoirs"] = df["Pouvoirs"].astype(str)
         # Conversion forcée des colonnes numériques
         for col in ["Niveau", "Points de Compétence", "FAVEDS 🤸", "Stratégie 🧠", "Coopération 🤝", "Engagement 🌟"]:
@@ -272,9 +272,12 @@ elif choice == "Fiche Élève":
                 st.info(f"💰 Coût: {cost} niveaux")
                 if st.button("Acheter ce pouvoir", key="acheter_pouvoir"):
                     if int(student_data["Niveau"]) >= cost:
+                        # Récupérer le niveau actuel, soustraire le coût, puis réassigner
+                        current_level = int(student_data["Niveau"])
+                        new_level = current_level - cost
                         st.session_state["students"].loc[
                             st.session_state["students"]["Nom"] == selected_student, "Niveau"
-                        ] -= cost
+                        ] = new_level
                         pouvoirs_anciens = str(student_data["Pouvoirs"]) if pd.notna(student_data["Pouvoirs"]) else ""
                         nouveaux_pouvoirs = pouvoirs_anciens + ", " + selected_item if pouvoirs_anciens else selected_item
                         st.session_state["students"].loc[
@@ -314,9 +317,12 @@ elif choice == "Fiche Élève":
                         "Engagement 🌟": int(student_data["Engagement 🌟"])
                     }
                     if int(student_data["Points de Compétence"]) >= role_cost and all(student_compétences[comp] > 0 for comp in required_compétences):
+                        # Récupérer les points actuels, soustraire le coût, puis réassigner
+                        current_points = int(student_data["Points de Compétence"])
+                        new_points = current_points - role_cost
                         st.session_state["students"].loc[
                             st.session_state["students"]["Nom"] == selected_student, "Points de Compétence"
-                        ] -= role_cost
+                        ] = new_points
                         roles_anciens = str(student_data["Rôles"]) if pd.notna(student_data["Rôles"]) else ""
                         nouveaux_roles = roles_anciens + ", " + selected_role if roles_anciens else selected_role
                         st.session_state["students"].loc[
