@@ -2,35 +2,43 @@ import streamlit as st
 import pandas as pd
 
 # -----------------------------------------------------------------------------
-# Configuration de la page et injection de CSS personnalisé
+# Configuration de la page et injection de CSS personnalisé pour un design moderne
 # -----------------------------------------------------------------------------
 st.set_page_config(page_title="Suivi EPS", page_icon="🏆", layout="wide")
 
-st.markdown(
-    """
-    <style>
-    /* Fond de page */
-    body {
-        background-color: #f0f2f6;
-    }
-    /* Personnalisation des boutons */
-    .stButton>button {
-        background-color: #2c3e50;
-        color: white;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 5px;
-        font-size: 16px;
-        margin: 5px;
-    }
-    /* Personnalisation des titres */
-    h1, h2, h3 {
-        color: #2c3e50;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+st.markdown("""
+<style>
+/* Fond global */
+body {
+    background-color: #f0f2f6;
+}
+
+/* Style pour les cartes (sections) */
+.card {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Personnalisation des boutons */
+.stButton>button {
+    background-color: #2c3e50;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    font-size: 16px;
+    margin: 5px;
+}
+
+/* Couleur des titres */
+h1, h2, h3 {
+    color: #2c3e50;
+}
+</style>
+""", unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
 # Initialisation des variables de session
@@ -54,55 +62,57 @@ def check_password():
             st.error("❌ Code incorrect, essayez encore.")
 
 if not st.session_state["authenticated"]:
+    st.markdown('<div class="card">', unsafe_allow_html=True)
     st.title("🔒 Espace sécurisé")
     check_password()
+    st.markdown('</div>', unsafe_allow_html=True)
     st.stop()
 
 # -----------------------------------------------------------------------------
 # Bloc d'acceptation des règles
 # -----------------------------------------------------------------------------
 if not st.session_state["accepted_rules"]:
+    st.markdown('<div class="card">', unsafe_allow_html=True)
     st.title("📜 Règles du Jeu")
-    st.markdown(
-        """
-        - L’élève peut gagner **4 niveaux** par séance de 45 minutes.
-          - **1 niveau** pour le fair-play.
-          - **1 niveau** pour le respect.
-          - **1 niveau** pour l’investissement.
-          - **1 niveau** pour l’atteinte des objectifs du cours.
-        - Tous les élèves commencent avec le rôle **d’Apprenti(e)**.
-        - **1 niveau = 5 points de compétences** à répartir librement.
-        - Chaque élève peut se spécialiser dans **2 compétences uniquement**.
-        
-           ### 🏪 Boutique des rôles et pouvoirs
-        | Rôles | Points nécessaires | Compétences requises | Explication |
-        |---|---|---|---|
-        | Testeur.euse | 200 | FAVEDS | Peut essayer en premier les nouveaux exercices. |
-        | Démonstrateur.rice | 150 | FAVEDS + Engagement | Présente les mouvements au reste du groupe. |
-        | Facilitateur.rice | 150 | Coopération + Engagement | Moins de répétitions imposées s’il maîtrise déjà l’exercice. |
-        | Créateur.rice de règles | 250 | Stratégie | Peut modifier certaines règles des exercices. |
-        | Meneur.euse tactique | 250 | Stratégie + Coopération | Oriente une équipe et propose des stratégies. |
-        | Arbitre / Régulateur.rice | 300 | Stratégie + Engagement | Aide à gérer les litiges et les décisions collectives. |
-        | Aide-coach | 250 | Coopération + Engagement | Peut accompagner un élève en difficulté. |
-        | Coordinateur.rice de groupe | 300 | Coopération | Premier choix des groupes. |
-        | Facilitateur.rice (social) | 250 | Coopération + Engagement | Peut proposer des ajustements pour favoriser l’intégration de tous. |
-        | Réducteur.rice des contraintes | 200 | FAVEDS + Engagement | Accès à des versions simplifiées ou allégées des consignes. |
-        | Autonome | 200 | Stratégie + Engagement | Peut choisir son propre parcours ou défi. |
-        | Responsable de séance | 350 | Stratégie + Coopération + Engagement | Peut diriger une partie de la séance. |
-        
-        ### 🏪 Boutique secrète
-        | Coût en niveau | Pouvoirs à choix |
-        |---|---|
-        | 40 | Le malin / la maligne : doubler ses niveaux gagnés à chaque cours. |
-        | 50 | Choix d’un jeu (5 min) ou donner 20 niveaux à quelqu’un. |
-        | 100 | Maître.sse des groupes pour une séance de 1h30 ou doubler ses points de compétences. |
-        | 150 | Maître.sse du thème d’une prochaine séance. |
-        | 300 | Roi / Reine de la séquence (permet de choisir le prochain thème que l’on fera pour 4 à 6 cours). |
-        """
-    )
+    st.markdown("""
+    - L’élève peut gagner **4 niveaux** par séance de 45 minutes.
+      - **1 niveau** pour le fair-play.
+      - **1 niveau** pour le respect.
+      - **1 niveau** pour l’investissement.
+      - **1 niveau** pour l’atteinte des objectifs du cours.
+    - Tous les élèves commencent avec le rôle **d’Apprenti(e)**.
+    - **1 niveau = 5 points de compétences** à répartir librement.
+    - Chaque élève peut se spécialiser dans **2 compétences uniquement**.
+    
+       ### 🏪 Boutique des rôles et pouvoirs
+    | Rôles | Points nécessaires | Compétences requises | Explication |
+    |---|---|---|---|
+    | Testeur.euse | 200 | FAVEDS | Peut essayer en premier les nouveaux exercices. |
+    | Démonstrateur.rice | 150 | FAVEDS + Engagement | Présente les mouvements au reste du groupe. |
+    | Facilitateur.rice | 150 | Coopération + Engagement | Moins de répétitions imposées s’il maîtrise déjà l’exercice. |
+    | Créateur.rice de règles | 250 | Stratégie | Peut modifier certaines règles des exercices. |
+    | Meneur.euse tactique | 250 | Stratégie + Coopération | Oriente une équipe et propose des stratégies. |
+    | Arbitre / Régulateur.rice | 300 | Stratégie + Engagement | Aide à gérer les litiges et les décisions collectives. |
+    | Aide-coach | 250 | Coopération + Engagement | Peut accompagner un élève en difficulté. |
+    | Coordinateur.rice de groupe | 300 | Coopération | Premier choix des groupes. |
+    | Facilitateur.rice (social) | 250 | Coopération + Engagement | Peut proposer des ajustements pour favoriser l’intégration de tous. |
+    | Réducteur.rice des contraintes | 200 | FAVEDS + Engagement | Accès à des versions simplifiées ou allégées des consignes. |
+    | Autonome | 200 | Stratégie + Engagement | Peut choisir son propre parcours ou défi. |
+    | Responsable de séance | 350 | Stratégie + Coopération + Engagement | Peut diriger une partie de la séance. |
+    
+    ### 🏪 Boutique secrète
+    | Coût en niveau | Pouvoirs à choix |
+    |---|---|
+    | 40 | Le malin / la maligne : doubler ses niveaux gagnés à chaque cours. |
+    | 50 | Choix d’un jeu (5 min) ou donner 20 niveaux à quelqu’un. |
+    | 100 | Maître.sse des groupes pour une séance de 1h30 ou doubler ses points de compétences. |
+    | 150 | Maître.sse du thème d’une prochaine séance. |
+    | 300 | Roi / Reine de la séquence (permet de choisir le prochain thème que l’on fera pour 4 à 6 cours). |
+    """)
     if st.button("OK, j'ai compris les règles"):
         st.session_state["accepted_rules"] = True
         st.experimental_rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
     st.stop()
 
 # -----------------------------------------------------------------------------
@@ -141,13 +151,16 @@ choice = st.sidebar.radio("Navigation", pages)
 # Page d'accueil
 # -----------------------------------------------------------------------------
 if choice == "Accueil":
+    st.markdown('<div class="card">', unsafe_allow_html=True)
     st.header("Bienvenue sur le Suivi EPS 🏆")
     st.write("Utilisez le menu à gauche pour naviguer entre les différentes sections de l'application.")
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
 # Page d'ajout d'élève
 # -----------------------------------------------------------------------------
 elif choice == "Ajouter Élève":
+    st.markdown('<div class="card">', unsafe_allow_html=True)
     st.header("➕ Ajout des participant.es")
     with st.form("ajouter_eleve_form"):
         nom = st.text_input("Nom")
@@ -183,11 +196,13 @@ elif choice == "Ajouter Élève":
         ).fillna("")
         save_data(st.session_state["students"])
         st.success(f"✅ {nom} ajouté avec niveau {niveau} et répartition des points complétée.")
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
 # Page du tableau de progression
 # -----------------------------------------------------------------------------
 elif choice == "Tableau de progression":
+    st.markdown('<div class="card">', unsafe_allow_html=True)
     st.header("📊 Tableau de progression")
     st.markdown("**Modifiez directement les valeurs dans le tableau ci-dessous.**")
     if not st.session_state["students"].empty:
@@ -200,11 +215,13 @@ elif choice == "Tableau de progression":
         st.info("[INFO] Tableau des élèves mis à jour.")
     else:
         st.warning("Aucun élève n'a encore été ajouté.")
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# Page de la fiche élève et boutiques associées
+# Page de la fiche élève avec boutiques en onglets
 # -----------------------------------------------------------------------------
 elif choice == "Fiche Élève":
+    st.markdown('<div class="card">', unsafe_allow_html=True)
     st.header("🔍 Fiche de l'élève")
     if not st.session_state["students"].empty:
         selected_student = st.selectbox("Choisir un élève", st.session_state["students"]["Nom"])
@@ -212,20 +229,22 @@ elif choice == "Fiche Élève":
             student_data = st.session_state["students"].loc[
                 st.session_state["students"]["Nom"] == selected_student
             ].iloc[0]
-            with st.container():
-                st.subheader(f"📌 Fiche de {selected_student}")
-                col1, col2 = st.columns(2)
-                with col1:
-                    st.write(f"**Niveau :** {student_data['Niveau']}")
-                    st.write(f"**Points de Compétence :** {student_data['Points de Compétence']}")
-                with col2:
-                    st.write(f"**FAVEDS 🤸 :** {student_data['FAVEDS 🤸']}")
-                    st.write(f"**Stratégie 🧠 :** {student_data['Stratégie 🧠']}")
-                    st.write(f"**Coopération 🤝 :** {student_data['Coopération 🤝']}")
-                    st.write(f"**Engagement 🌟 :** {student_data['Engagement 🌟']}")
+            st.subheader(f"📌 Fiche de {selected_student}")
+            col1, col2 = st.columns(2)
+            with col1:
+                st.write(f"**Niveau :** {student_data['Niveau']}")
+                st.write(f"**Points de Compétence :** {student_data['Points de Compétence']}")
+            with col2:
+                st.write(f"**FAVEDS 🤸 :** {student_data['FAVEDS 🤸']}")
+                st.write(f"**Stratégie 🧠 :** {student_data['Stratégie 🧠']}")
+                st.write(f"**Coopération 🤝 :** {student_data['Coopération 🤝']}")
+                st.write(f"**Engagement 🌟 :** {student_data['Engagement 🌟']}")
             
-            # Boutique des Pouvoirs
-            with st.expander("🛒 Boutique des Pouvoirs"):
+            # Séparation en onglets pour les boutiques
+            onglets = st.tabs(["🛒 Boutique des Pouvoirs", "🏅 Boutique des Rôles"])
+            
+            with onglets[0]:
+                st.markdown('<div class="card">', unsafe_allow_html=True)
                 store_items = {
                     "Le malin / la maligne": 40,
                     "Choix d’un jeu (5 min) ou donner 20 niveaux": 50,
@@ -233,10 +252,10 @@ elif choice == "Fiche Élève":
                     "Maître du thème d’une séance": 150,
                     "Roi / Reine de la séquence": 300
                 }
-                selected_item = st.selectbox("🛍️ Choisir un pouvoir", list(store_items.keys()))
+                selected_item = st.selectbox("🛍️ Choisir un pouvoir", list(store_items.keys()), key="pouvoirs")
                 cost = store_items[selected_item]
                 st.info(f"💰 Coût: {cost} niveaux")
-                if st.button("Acheter ce pouvoir"):
+                if st.button("Acheter ce pouvoir", key="acheter_pouvoir"):
                     if student_data["Niveau"] >= cost:
                         st.session_state["students"].loc[
                             st.session_state["students"]["Nom"] == selected_student, "Niveau"
@@ -250,9 +269,10 @@ elif choice == "Fiche Élève":
                         st.success(f"🛍️ {selected_student} a acheté '{selected_item}'.")
                     else:
                         st.error("❌ Niveaux insuffisants !")
+                st.markdown('</div>', unsafe_allow_html=True)
             
-            # Boutique des Rôles
-            with st.expander("🏅 Boutique des Rôles"):
+            with onglets[1]:
+                st.markdown('<div class="card">', unsafe_allow_html=True)
                 roles_store = {
                     "🧪 Testeur.euse": {"Coût": 200, "Compétences Requises": ["FAVEDS 🤸"]},
                     "🎭 Démonstrateur.rice": {"Coût": 150, "Compétences Requises": ["FAVEDS 🤸", "Engagement 🌟"]},
@@ -267,11 +287,11 @@ elif choice == "Fiche Élève":
                     "🛤️ Autonome": {"Coût": 200, "Compétences Requises": ["Stratégie 🧠", "Engagement 🌟"]},
                     "🏆 Responsable de séance": {"Coût": 350, "Compétences Requises": ["Stratégie 🧠", "Coopération 🤝", "Engagement 🌟"]}
                 }
-                selected_role = st.selectbox("🎭 Choisir un rôle", list(roles_store.keys()))
+                selected_role = st.selectbox("🎭 Choisir un rôle", list(roles_store.keys()), key="roles")
                 role_cost = roles_store[selected_role]["Coût"]
                 required_competences = roles_store[selected_role]["Compétences Requises"]
                 st.info(f"💰 Coût: {role_cost} points de compétence\n\n🔹 Compétences requises: {', '.join(required_competences)}")
-                if st.button("Acquérir ce rôle"):
+                if st.button("Acquérir ce rôle", key="acheter_role"):
                     student_competences = {
                         "FAVEDS 🤸": student_data["FAVEDS 🤸"],
                         "Stratégie 🧠": student_data["Stratégie 🧠"],
@@ -291,7 +311,9 @@ elif choice == "Fiche Élève":
                         st.success(f"🏅 {selected_student} a acquis le rôle '{selected_role}'.")
                     else:
                         st.error("❌ Points de compétence insuffisants ou compétences requises non atteintes !")
+                st.markdown('</div>', unsafe_allow_html=True)
         else:
             st.warning("Veuillez sélectionner un élève.")
     else:
         st.warning("Aucun élève n'a encore été ajouté. Veuillez ajouter un élève dans la section 'Ajouter Élève'.")
+    st.markdown('</div>', unsafe_allow_html=True)
