@@ -1,6 +1,27 @@
 import streamlit as st
 import pandas as pd
 
+# 🔐 Vérification du code d'accès
+if "authenticated" not in st.session_state:
+    st.session_state["authenticated"] = False
+
+def check_password():
+    """Vérifie si le mot de passe entré est correct"""
+    user_password = st.text_input("🔑 Entrez le code d'accès :", type="password")
+    if st.button("Valider"):
+        if user_password == st.secrets["ACCESS_CODE"]:
+            st.session_state["authenticated"] = True
+            st.success("✅ Accès autorisé !")
+            st.experimental_rerun()
+        else:
+            st.error("❌ Code incorrect, essayez encore.")
+
+if not st.session_state["authenticated"]:
+    st.title("🔒 Accès Restreint")
+    check_password()
+    st.stop()
+
+
 # Configuration générale de l'application
 st.set_page_config(page_title="Suivi EPS", page_icon="🏆", layout="wide")
 
