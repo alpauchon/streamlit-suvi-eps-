@@ -134,9 +134,13 @@ def load_data():
         df = pd.read_csv("students_data.csv")
         if df.empty:
             raise FileNotFoundError
+        # Assurer que la colonne "Pouvoirs" est de type chaîne de caractères
         df["Pouvoirs"] = df["Pouvoirs"].astype(str)
+        # Conversion forcée des colonnes numériques
+        for col in ["Niveau", "Points de Compétence", "FAVEDS 🤸", "Stratégie 🧠", "Coopération 🤝", "Engagement 🌟"]:
+            df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0).astype(int)
         print("[INFO] Données chargées avec succès.")
-        return df.fillna(0)
+        return df
     except FileNotFoundError:
         print("[WARNING] Fichier non trouvé, création d'un nouveau DataFrame.")
         return pd.DataFrame({
@@ -267,7 +271,7 @@ elif choice == "Fiche Élève":
                 cost = store_items[selected_item]
                 st.info(f"💰 Coût: {cost} niveaux")
                 if st.button("Acheter ce pouvoir", key="acheter_pouvoir"):
-                    if student_data["Niveau"] >= cost:
+                    if int(student_data["Niveau"]) >= cost:
                         st.session_state["students"].loc[
                             st.session_state["students"]["Nom"] == selected_student, "Niveau"
                         ] -= cost
@@ -304,12 +308,12 @@ elif choice == "Fiche Élève":
                 st.info(f"💰 Coût: {role_cost} points de compétence\n\n🔹 Compétences requises: {', '.join(required_compétences)}")
                 if st.button("Acquérir ce rôle", key="acheter_role"):
                     student_compétences = {
-                        "FAVEDS 🤸": student_data["FAVEDS 🤸"],
-                        "Stratégie 🧠": student_data["Stratégie 🧠"],
-                        "Coopération 🤝": student_data["Coopération 🤝"],
-                        "Engagement 🌟": student_data["Engagement 🌟"]
+                        "FAVEDS 🤸": int(student_data["FAVEDS 🤸"]),
+                        "Stratégie 🧠": int(student_data["Stratégie 🧠"]),
+                        "Coopération 🤝": int(student_data["Coopération 🤝"]),
+                        "Engagement 🌟": int(student_data["Engagement 🌟"])
                     }
-                    if student_data["Points de Compétence"] >= role_cost and all(student_compétences[comp] > 0 for comp in required_compétences):
+                    if int(student_data["Points de Compétence"]) >= role_cost and all(student_compétences[comp] > 0 for comp in required_compétences):
                         st.session_state["students"].loc[
                             st.session_state["students"]["Nom"] == selected_student, "Points de Compétence"
                         ] -= role_cost
