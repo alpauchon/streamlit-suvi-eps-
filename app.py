@@ -2,12 +2,6 @@ import streamlit as st
 import pandas as pd
 
 # -----------------------------------------------------------------------------
-# Importation de ChatterBot pour le chatbot
-# -----------------------------------------------------------------------------
-from chatterbot import ChatBot
-from chatterbot.trainers import ChatterBotCorpusTrainer
-
-# -----------------------------------------------------------------------------
 # Configuration de la page et injection de CSS pour un design moderne
 # -----------------------------------------------------------------------------
 st.set_page_config(page_title="Suivi EPS", page_icon="🏆", layout="wide")
@@ -58,7 +52,7 @@ def rerun_app():
         st.error("La fonction de redémarrage automatique n'est pas disponible. Veuillez mettre à jour Streamlit.")
 
 # -----------------------------------------------------------------------------
-# Chargement et sauvegarde des données
+# Chargement des données
 # -----------------------------------------------------------------------------
 def load_data():
     try:
@@ -217,9 +211,9 @@ if not st.session_state["accepted_rules"]:
 # Définition des pages disponibles selon le rôle
 # -----------------------------------------------------------------------------
 if st.session_state["role"] == "teacher":
-    pages = ["Accueil", "Ajouter Élève", "Tableau de progression", "Fiche Élève", "Chatbot"]
+    pages = ["Accueil", "Ajouter Élève", "Tableau de progression", "Fiche Élève"]
 else:  # Mode Élève
-    pages = ["Accueil", "Tableau de progression", "Fiche Élève", "Chatbot"]
+    pages = ["Accueil", "Tableau de progression", "Fiche Élève"]
 
 choice = st.sidebar.radio("Navigation", pages)
 
@@ -338,6 +332,7 @@ elif choice == "Tableau de progression":
                 df = st.session_state["students"].copy()
                 idx = df.index[df["Nom"] == st.session_state["user"]]
                 if len(idx) > 0:
+                    # Remplacer uniquement la ligne de l'élève en utilisant idx[0]
                     df.loc[idx[0]] = edited_my_data.iloc[0]
                 st.session_state["students"] = df
                 save_data(st.session_state["students"])
@@ -448,35 +443,4 @@ elif choice == "Fiche Élève":
             st.markdown('</div>', unsafe_allow_html=True)
     else:
         st.warning("Aucun élève n'a encore été ajouté. Veuillez ajouter un élève dans la section 'Ajouter Élève'.")
-    st.markdown('</div>', unsafe_allow_html=True)
-
-# -----------------------------------------------------------------------------
-# Page Chatbot (accessible à tous)
-# -----------------------------------------------------------------------------
-elif choice == "Chatbot":
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.header("Chatbot interactif")
-    # Initialiser le chatbot dans la session s'il n'est pas déjà présent
-    if "chatbot" not in st.session_state:
-        st.session_state["chatbot"] = ChatBot(
-            'Assistant',
-            storage_adapter='chatterbot.storage.SQLStorageAdapter',
-            database_uri='sqlite:///database.sqlite3'
-        )
-        trainer = ChatterBotCorpusTrainer(st.session_state["chatbot"])
-        try:
-            # Entraînement avec le corpus français
-            trainer.train("chatterbot.corpus.french")
-        except Exception as e:
-            st.error("Erreur lors de l'entraînement du chatbot : " + str(e))
-    if "chat_history" not in st.session_state:
-        st.session_state["chat_history"] = []
-    user_question = st.text_input("Posez votre question ici :", key="chat_input")
-    if st.button("Envoyer", key="send_chat"):
-        if user_question:
-            st.session_state["chat_history"].append(("Vous", user_question))
-            response = st.session_state["chatbot"].get_response(user_question)
-            st.session_state["chat_history"].append(("Chatbot", str(response)))
-    for sender, text in st.session_state["chat_history"]:
-        st.write(f"**{sender} :** {text}")
     st.markdown('</div>', unsafe_allow_html=True)
