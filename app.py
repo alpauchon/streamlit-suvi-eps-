@@ -22,6 +22,29 @@ if not st.session_state["authenticated"]:
     st.title("🔒 Accès Restreint")
     check_password()
     st.stop()
+    
+if st.button("⬅️ Retour à la gestion des élèves"):
+    go_to_page("gestion_eleves")
+    
+if st.session_state["page"] == "accueil":
+    st.title("📜 Règles du Jeu")
+    st.markdown("""
+    - L’élève peut gagner **4 niveaux** par séance de 45 minutes.
+      - **1 niveau** pour le fair-play.
+      - **1 niveau** pour le respect.
+      - **1 niveau** pour l’investissement.
+      - **1 niveau** pour l’atteinte des objectifs du cours.
+    - Tous les élèves commencent avec le rôle **d’Apprenti(e)**.
+    - **1 niveau = 5 points de compétences** à répartir librement.
+    - Chaque élève peut se spécialiser dans **2 compétences uniquement**.
+    """)
+    
+    if st.button("⬅️ Retour à la gestion des élèves"):
+        go_to_page("gestion_eleves")
+
+    if st.button("➡️ Continuer vers la gestion des élèves"):
+        go_to_page("gestion_eleves")
+
 
 # 🔄 Affichage des règles après authentification
 if not st.session_state["accepted_rules"]:
