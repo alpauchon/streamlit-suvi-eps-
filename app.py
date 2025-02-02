@@ -218,6 +218,16 @@ if choice == "Accueil":
     st.markdown(f"**Mode d'accès :** {st.session_state['role'].capitalize()} ({st.session_state['user']})")
     st.markdown('</div>', unsafe_allow_html=True)
 
+if st.session_state["role"] == "teacher":
+    if st.download_button(
+        "Télécharger le fichier CSV",
+        data=st.session_state["students"].to_csv(index=False),
+        file_name="students_data.csv",
+        mime="text/csv"
+    ):
+        st.success("Fichier téléchargé.")
+
+
 # -----------------------------------------------------------------------------
 # Page d'ajout d'élève (réservée aux enseignants)
 # -----------------------------------------------------------------------------
