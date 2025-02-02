@@ -96,6 +96,8 @@ if "user" not in st.session_state:
     st.session_state["user"] = None
 if "accepted_rules" not in st.session_state:
     st.session_state["accepted_rules"] = False
+if "do_rerun" not in st.session_state:
+    st.session_state["do_rerun"] = False
 
 # -----------------------------------------------------------------------------
 # Bloc d'accès spécialisé
@@ -106,12 +108,12 @@ if st.session_state["role"] is None:
     access_mode = st.radio("Choisissez votre rôle", options=["Enseignant", "Élève"])
     if access_mode == "Enseignant":
         teacher_password = st.text_input("Entrez le code d'accès enseignant :", type="password")
-        if st.button("Se connecter comme enseignant"):
+        if st.button("Se connecter comme enseignant", key="teacher_conn"):
             if teacher_password == st.secrets["ACCESS_CODE"]:
                 st.session_state["role"] = "teacher"
                 st.session_state["user"] = "Enseignant"
+                st.session_state["do_rerun"] = True
                 st.success("Accès enseignant autorisé.")
-                rerun_app()
             else:
                 st.error("Code incorrect.")
     else:  # Mode Élève
@@ -125,7 +127,7 @@ if st.session_state["role"] is None:
                 st.info("Première connexion : veuillez créer un code d'accès.")
                 new_code = st.text_input("Créez un code d'accès (au moins 4 caractères)", type="password", key="new_student_code")
                 new_code_confirm = st.text_input("Confirmez votre code", type="password", key="new_student_code_confirm")
-                if st.button("Enregistrer et se connecter"):
+                if st.button("Enregistrer et se connecter", key="student_first_conn"):
                     if new_code != new_code_confirm:
                         st.error("Les codes ne correspondent pas.")
                     elif len(new_code) < 4:
@@ -136,19 +138,22 @@ if st.session_state["role"] is None:
                         save_data(st.session_state["students"])
                         st.session_state["role"] = "student"
                         st.session_state["user"] = student_name
+                        st.session_state["do_rerun"] = True
                         st.success(f"Accès élève autorisé pour {student_name}.")
-                        rerun_app()
             else:
                 code_entered = st.text_input("Entrez votre code d'accès", type="password", key="existing_student_code")
-                if st.button("Se connecter comme élève"):
+                if st.button("Se connecter comme élève", key="student_conn"):
                     if code_entered != student_row["StudentCode"]:
                         st.error("Code incorrect.")
                     else:
                         st.session_state["role"] = "student"
                         st.session_state["user"] = student_name
+                        st.session_state["do_rerun"] = True
                         st.success(f"Accès élève autorisé pour {student_name}.")
-                        rerun_app()
     st.markdown('</div>', unsafe_allow_html=True)
+    if st.session_state["do_rerun"]:
+        st.session_state["do_rerun"] = False
+        rerun_app()
     st.stop()
 
 # -----------------------------------------------------------------------------
@@ -166,7 +171,7 @@ if not st.session_state["accepted_rules"]:
     - Tous les élèves commencent avec le rôle **d’Apprenti(e)**.
     - **1 niveau = 5 points de compétences** à répartir librement.
     - Chaque élève peut se spécialiser dans **2 compétences uniquement**.
-    - L'élève peut acheter des pouvoirs ou des rôles à l'aide de ses niveaux et compétences.
+    - L'élève peut acheter des pouvoirs ou des rôles avec ses niveaux et compétences.
     
        ### 🏪 Boutique des rôles et pouvoirs
     | Rôles | Points nécessaires | Compétences requises | Explication |
@@ -193,10 +198,13 @@ if not st.session_state["accepted_rules"]:
     | 150 | Maître.sse du thème d’une prochaine séance. |
     | 300 | Roi / Reine de la séquence (permet de choisir le prochain thème que l’on fera pour 4 à 6 cours). |
     """)
-    if st.button("OK, j'ai compris les règles"):
+    if st.button("OK, j'ai compris les règles", key="accept_rules"):
         st.session_state["accepted_rules"] = True
-        rerun_app()
+        st.session_state["do_rerun"] = True
     st.markdown('</div>', unsafe_allow_html=True)
+    if st.session_state["do_rerun"]:
+        st.session_state["do_rerun"] = False
+        rerun_app()
     st.stop()
 
 # -----------------------------------------------------------------------------
@@ -218,7 +226,7 @@ if choice == "Accueil":
     st.write("Utilisez le menu à gauche pour naviguer entre les différentes sections de l'application.")
     st.markdown(f"**Mode d'accès :** {st.session_state['role'].capitalize()} ({st.session_state['user']})")
     
-    # Affichage du bouton de téléchargement uniquement pour l'enseignant
+    # Bouton de téléchargement réservé à l'enseignant
     if st.session_state["role"] == "teacher":
         if st.download_button(
             "Télécharger le fichier CSV",
@@ -227,12 +235,10 @@ if choice == "Accueil":
             mime="text/csv"
         ):
             st.success("Fichier téléchargé.")
-
     st.markdown('</div>', unsafe_allow_html=True)
 
-
 # -----------------------------------------------------------------------------
-# Page d'ajout d'élève (réservée aux enseignants)
+# Page d'ajout d'élève (enseignant uniquement)
 # -----------------------------------------------------------------------------
 elif choice == "Ajouter Élève":
     if st.session_state["role"] != "teacher":
@@ -273,13 +279,13 @@ elif choice == "Ajouter Élève":
                 [st.session_state["students"], new_data],
                 ignore_index=True
             )
-            # Reconvertir les colonnes numériques après ajout
             for col in ["Niveau", "Points de Compétence", "FAVEDS 🤸", "Stratégie 🧠", "Coopération 🤝", "Engagement 🌟"]:
-                st.session_state["students"][col] = pd.to_numeric(st.session_state["students"][col], errors="coerce").fillna(0).astype(int)
+                st.session_state["students"][col] = pd.to_numeric(
+                    st.session_state["students"][col], errors="coerce"
+                ).fillna(0).astype(int)
             save_data(st.session_state["students"])
             st.success(f"✅ {nom} ajouté avec niveau {niveau} et répartition des points complétée.")
         st.markdown('</div>', unsafe_allow_html=True)
-
 
 # -----------------------------------------------------------------------------
 # Page du tableau de progression
@@ -289,30 +295,27 @@ elif choice == "Tableau de progression":
     st.header("📊 Tableau de progression")
     st.markdown("**Modifiez directement les valeurs dans le tableau ci-dessous.**")
     if st.session_state["role"] == "teacher":
-        # L'enseignant voit et peut éditer l'intégralité du tableau
         edited_df = st.data_editor(
             st.session_state["students"],
             num_rows="dynamic",
             use_container_width=True,
             key="editor_teacher"
         )
-        if st.button("Enregistrer modifications"):
+        if st.button("Enregistrer modifications", key="save_teacher"):
             st.session_state["students"] = edited_df
             save_data(st.session_state["students"])
             st.success("Modifications enregistrées.")
     else:
-        # Pour l'élève, on affiche uniquement sa ligne
         my_data = st.session_state["students"][st.session_state["students"]["Nom"] == st.session_state["user"]]
         edited_my_data = st.data_editor(
             my_data,
             use_container_width=True,
             key="editor_student"
         )
-        if st.button("Enregistrer modifications"):
+        if st.button("Enregistrer modifications", key="save_student"):
             df = st.session_state["students"].copy()
             idx = df.index[df["Nom"] == st.session_state["user"]]
             if len(idx) > 0:
-                # Remplacer uniquement la ligne de l'élève
                 df.loc[idx] = edited_my_data.iloc[0]
             st.session_state["students"] = df
             save_data(st.session_state["students"])
