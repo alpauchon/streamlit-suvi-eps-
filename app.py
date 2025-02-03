@@ -72,6 +72,23 @@ def save_hof(hof_data):
         json.dump(hof_data, f, ensure_ascii=False, indent=4)
 
 # -----------------------------------------------------------------------------
+# Fonctions de gestion de la vidéo du dernier cours (sauvegarde en JSON)
+# -----------------------------------------------------------------------------
+VIDEO_FILE = "video_link.json"
+
+def load_video_link():
+    if os.path.exists(VIDEO_FILE):
+        with open(VIDEO_FILE, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            return data.get("video_url", "")
+    else:
+        return ""
+
+def save_video_link(video_url):
+    with open(VIDEO_FILE, "w", encoding="utf-8") as f:
+        json.dump({"video_url": video_url}, f, ensure_ascii=False, indent=4)
+
+# -----------------------------------------------------------------------------
 # Chargement des données des élèves
 # -----------------------------------------------------------------------------
 def load_data():
@@ -194,9 +211,9 @@ def get_leaderboard(df):
 # Définition des pages disponibles selon le rôle
 # -----------------------------------------------------------------------------
 if st.session_state["role"] == "teacher":
-    pages = ["Accueil", "Ajouter Élève", "Tableau de progression", "Attribution de niveaux", "Hall of Fame", "Leaderboard", "Fiche Élève"]
+    pages = ["Accueil", "Ajouter Élève", "Tableau de progression", "Attribution de niveaux", "Hall of Fame", "Leaderboard", "Vidéo du dernier cours", "Fiche Élève"]
 else:
-    pages = ["Accueil", "Tableau de progression", "Hall of Fame", "Leaderboard", "Fiche Élève"]
+    pages = ["Accueil", "Tableau de progression", "Hall of Fame", "Leaderboard", "Vidéo du dernier cours", "Fiche Élève"]
 
 choice = st.sidebar.radio("Navigation", pages)
 
@@ -257,6 +274,14 @@ images = {
       <rect width="100%" height="150" fill="#16a085" />
       <text x="50%" y="50%" fill="#ffffff" font-size="36" text-anchor="middle" dy=".3em">
         Leaderboard
+      </text>
+    </svg>
+    """,
+    "Vidéo du dernier cours": """
+    <svg width="100%" height="150" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100%" height="150" fill="#9b59b6" />
+      <text x="50%" y="50%" fill="#ffffff" font-size="36" text-anchor="middle" dy=".3em">
+        Vidéo du dernier cours
       </text>
     </svg>
     """
@@ -451,8 +476,6 @@ elif choice == "Leaderboard":
     st.header("🏆 Leaderboard")
     # Tri automatique des élèves par points décroissants
     leaderboard = st.session_state["students"].sort_values("Points de Compétence", ascending=False)
-    
-    # Affichage du top 3 avec mise en avant ludique
     st.subheader("Top 3")
     top3 = leaderboard.head(3)
     for rank, (_, row) in enumerate(top3.iterrows(), start=1):
@@ -461,11 +484,33 @@ elif choice == "Leaderboard":
             f"**Rôle:** {row['Rôles']} | **Pouvoirs:** {row['Pouvoirs']} :trophy:",
             unsafe_allow_html=True
         )
-    
     st.subheader("Classement complet")
     st.dataframe(leaderboard[["Nom", "Niveau", "Points de Compétence", "Rôles", "Pouvoirs"]])
     st.markdown('</div>', unsafe_allow_html=True)
 
+# -----------------------------------------------------------------------------
+# Page Vidéo du dernier cours (accessible à tous, modifiable uniquement par l'enseignant)
+# -----------------------------------------------------------------------------
+elif choice == "Vidéo du dernier cours":
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.header("📹 Vidéo du dernier cours")
+    # Charger l'URL de la vidéo depuis le fichier JSON
+    video_url = load_video_link()
+    # Si l'utilisateur est enseignant, lui permettre de modifier la vidéo
+    if st.session_state["role"] == "teacher":
+        st.subheader("Modifier la vidéo")
+        with st.form("video_form"):
+            new_video_url = st.text_input("Entrez l'URL de la vidéo (YouTube, Vimeo, etc.)", value=video_url)
+            if st.form_submit_button("Enregistrer la vidéo"):
+                save_video_link(new_video_url)
+                st.success("Vidéo mise à jour.")
+                video_url = new_video_url
+    # Affichage de la vidéo pour tous
+    if video_url:
+        st.video(video_url)
+    else:
+        st.info("Aucune vidéo n'a encore été enregistrée.")
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
 # Page de la fiche élève
@@ -513,7 +558,7 @@ elif choice == "Fiche Élève":
                     st.session_state["students"].loc[st.session_state["students"]["Nom"] == selected_student, "Niveau"] = new_level
                     anciens_pouvoirs = str(student_data["Pouvoirs"]) if pd.notna(student_data["Pouvoirs"]) else ""
                     nouveaux_pouvoirs = anciens_pouvoirs + ", " + selected_item if anciens_pouvoirs else selected_item
-                    st.session_state["students"].loc[st.session_state["students"]["Nom"] == selected_student, "Pouvoirs"] = nouveaux_pouvoirs
+                    st.session_state["students"].loc[st.session_state["students"]["Nom"] == selected_student, "Pouvoirs"] = nouveaux_roles
                     save_data(st.session_state["students"])
                     st.success(f"🛍️ {selected_student} a acheté '{selected_item}'.")
                 else:
