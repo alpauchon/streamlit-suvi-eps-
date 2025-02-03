@@ -460,7 +460,7 @@ elif choice == "Attribution de niveaux":
                 st.session_state["level_assignments"] = []
         st.markdown('</div>', unsafe_allow_html=True)
 
-# -----------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 # Page Hall of Fame (accessible à tous, modifiable uniquement par l'enseignant)
 # -----------------------------------------------------------------------------
 elif choice == "Hall of Fame":
@@ -470,17 +470,29 @@ elif choice == "Hall of Fame":
     
     # Charger le Hall of Fame depuis le fichier si non présent en session
     if "hall_of_fame" not in st.session_state:
-        st.session_state["hall_of_fame"] = load_hof()
+        # Initialisation par défaut avec 3 entrées vides
+        st.session_state["hall_of_fame"] = [{"name": "", "achievement": ""} for _ in range(3)]
     
     # Modification réservée à l'enseignant
     if st.session_state["role"] == "teacher":
         st.subheader("Modifier le Hall of Fame")
+        # Permet de choisir le nombre d'élèves à mettre en lumière (entre 1 et 5)
+        nb_entries = st.number_input(
+            "Nombre d'élèves à mettre en lumière", 
+            min_value=1, max_value=5, 
+            value=len(st.session_state["hall_of_fame"]) if st.session_state["hall_of_fame"] else 3, 
+            step=1
+        )
         with st.form("hall_of_fame_form"):
             new_entries = []
-            for i in range(3):
+            for i in range(nb_entries):
                 st.write(f"### Élève {i+1}")
-                name = st.selectbox(f"Nom de l'élève {i+1}", options=st.session_state["students"]["Nom"].tolist(), key=f"hof_name_{i}")
-                achievement = st.text_area(f"Exploits de {name}", key=f"hof_achievement_{i}")
+                # Pour garder une continuité, si une entrée existait déjà, on la réutilise
+                options = st.session_state["students"]["Nom"].tolist()
+                default_name = st.session_state["hall_of_fame"][i]["name"] if i < len(st.session_state["hall_of_fame"]) else ""
+                name = st.selectbox(f"Nom de l'élève {i+1}", options=options, index=options.index(default_name) if default_name in options else 0, key=f"hof_name_{i}")
+                default_achievement = st.session_state["hall_of_fame"][i]["achievement"] if i < len(st.session_state["hall_of_fame"]) else ""
+                achievement = st.text_area(f"Exploits de {name}", value=default_achievement, key=f"hof_achievement_{i}")
                 new_entries.append({"name": name, "achievement": achievement})
             if st.form_submit_button("Enregistrer le Hall of Fame"):
                 st.session_state["hall_of_fame"] = new_entries
@@ -494,6 +506,7 @@ elif choice == "Hall of Fame":
         else:
             st.markdown("*Entrée vide*")
     st.markdown('</div>', unsafe_allow_html=True)
+
 
 # -----------------------------------------------------------------------------
 # Page de la fiche élève
