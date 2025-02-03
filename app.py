@@ -451,14 +451,21 @@ elif choice == "Leaderboard":
     st.header("🏆 Leaderboard")
     # Tri automatique des élèves par points décroissants
     leaderboard = st.session_state["students"].sort_values("Points de Compétence", ascending=False)
-    # Affichage du top 3 avec une mise en avant ludique
+    
+    # Affichage du top 3 avec mise en avant ludique
     st.subheader("Top 3")
     top3 = leaderboard.head(3)
     for rank, (_, row) in enumerate(top3.iterrows(), start=1):
-        st.markdown(f"**{rank}. {row['Nom']}** - Niveau: {row['Niveau']} - Points: {row['Points de Compétence']} :trophy:")
+        st.markdown(
+            f"**{rank}. {row['Nom']}** - Niveau: {row['Niveau']} - Points: {row['Points de Compétence']}<br>"
+            f"**Rôle:** {row['Rôles']} | **Pouvoirs:** {row['Pouvoirs']} :trophy:",
+            unsafe_allow_html=True
+        )
+    
     st.subheader("Classement complet")
-    st.dataframe(leaderboard[["Nom", "Niveau", "Points de Compétence"]])
+    st.dataframe(leaderboard[["Nom", "Niveau", "Points de Compétence", "Rôles", "Pouvoirs"]])
     st.markdown('</div>', unsafe_allow_html=True)
+
 
 # -----------------------------------------------------------------------------
 # Page de la fiche élève
