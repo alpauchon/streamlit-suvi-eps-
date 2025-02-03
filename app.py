@@ -121,7 +121,6 @@ if st.session_state["role"] is None:
             st.warning("Aucun élève n'est enregistré. Veuillez contacter votre enseignant.")
         else:
             student_name = st.selectbox("Choisissez votre nom", st.session_state["students"]["Nom"])
-            # Récupérer la ligne correspondant à l'élève sélectionné
             student_row = st.session_state["students"].loc[st.session_state["students"]["Nom"] == student_name].iloc[0]
             if student_row["StudentCode"] == "":
                 st.info("Première connexion : veuillez créer un code d'accès.")
@@ -184,7 +183,7 @@ if not st.session_state["accepted_rules"]:
     | Arbitre / Régulateur.rice | 300 | Stratégie + Engagement | Aide à gérer les litiges et les décisions collectives. |
     | Aide-coach | 250 | Coopération + Engagement | Peut accompagner un élève en difficulté. |
     | Coordinateur.rice de groupe | 300 | Coopération | Premier choix des groupes. |
-    | Facilitateur.rice (social) | 250 | Coopération + Engagement | Peut proposer des ajustements pour favoriser l’intégration de tous. |
+    | Facilitateur.rice (social) | 250 | Coopération + Engagement | Peut proposer des ajustements pour favoriser l’intégration. |
     | Réducteur.rice des contraintes | 200 | FAVEDS + Engagement | Accès à des versions simplifiées ou allégées des consignes. |
     | Autonome | 200 | Stratégie + Engagement | Peut choisir son propre parcours ou défi. |
     | Responsable de séance | 350 | Stratégie + Coopération + Engagement | Peut diriger une partie de la séance. |
@@ -218,10 +217,50 @@ else:  # Mode Élève
 choice = st.sidebar.radio("Navigation", pages)
 
 # -----------------------------------------------------------------------------
+# Images SVG pour chaque section
+# -----------------------------------------------------------------------------
+images = {
+    "Accueil": """
+    <svg width="100%" height="150" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100%" height="150" fill="#2c3e50" />
+      <text x="50%" y="50%" fill="#ffffff" font-size="36" text-anchor="middle" dy=".3em">
+        Bienvenue sur Suivi EPS
+      </text>
+    </svg>
+    """,
+    "Ajouter Élève": """
+    <svg width="100%" height="150" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100%" height="150" fill="#27ae60" />
+      <text x="50%" y="50%" fill="#ffffff" font-size="36" text-anchor="middle" dy=".3em">
+        Ajout des participant.e.s
+      </text>
+    </svg>
+    """,
+    "Tableau de progression": """
+    <svg width="100%" height="150" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100%" height="150" fill="#8e44ad" />
+      <text x="50%" y="50%" fill="#ffffff" font-size="36" text-anchor="middle" dy=".3em">
+        Tableau de progression
+      </text>
+    </svg>
+    """,
+    "Fiche Élève": """
+    <svg width="100%" height="150" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100%" height="150" fill="#e67e22" />
+      <text x="50%" y="50%" fill="#ffffff" font-size="36" text-anchor="middle" dy=".3em">
+        Fiche de l'élève
+      </text>
+    </svg>
+    """
+}
+
+# -----------------------------------------------------------------------------
 # Page d'accueil
 # -----------------------------------------------------------------------------
 if choice == "Accueil":
     st.markdown('<div class="card">', unsafe_allow_html=True)
+    # Affichage de l'image de la section Accueil
+    st.markdown(images["Accueil"], unsafe_allow_html=True)
     st.header("Bienvenue sur le Suivi EPS 🏆")
     st.write("Utilisez le menu à gauche pour naviguer entre les différentes sections de l'application.")
     st.markdown(f"**Mode d'accès :** {st.session_state['role'].capitalize()} ({st.session_state['user']})")
@@ -245,7 +284,9 @@ elif choice == "Ajouter Élève":
         st.error("Accès réservé aux enseignants.")
     else:
         st.markdown('<div class="card">', unsafe_allow_html=True)
-        st.header("➕ Ajout des participant.es")
+        # Affichage de l'image de la section Ajout d'élève
+        st.markdown(images["Ajouter Élève"], unsafe_allow_html=True)
+        st.header("➕ Ajout des participant.e.s")
         with st.form("ajouter_eleve_form"):
             nom = st.text_input("Nom")
             niveau = st.number_input("Niveau de départ", min_value=0, max_value=10000, step=1)
@@ -291,6 +332,8 @@ elif choice == "Ajouter Élève":
 # -----------------------------------------------------------------------------
 elif choice == "Tableau de progression":
     st.markdown('<div class="card">', unsafe_allow_html=True)
+    # Affichage de l'image de la section Tableau de progression
+    st.markdown(images["Tableau de progression"], unsafe_allow_html=True)
     st.header("📊 Tableau de progression")
     st.markdown("**Modifiez directement les valeurs dans le tableau ci-dessous.**")
     # Fonction de validation de la somme des points attribués aux compétences
@@ -344,6 +387,8 @@ elif choice == "Tableau de progression":
 # -----------------------------------------------------------------------------
 elif choice == "Fiche Élève":
     st.markdown('<div class="card">', unsafe_allow_html=True)
+    # Affichage de l'image de la section Fiche Élève
+    st.markdown(images["Fiche Élève"], unsafe_allow_html=True)
     st.header("🔍 Fiche de l'élève")
     if st.session_state["role"] == "teacher":
         selected_student = st.selectbox("Choisir un élève", st.session_state["students"]["Nom"])
