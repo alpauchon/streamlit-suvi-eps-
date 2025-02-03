@@ -210,10 +210,10 @@ if not st.session_state["accepted_rules"]:
 # Définition des pages disponibles selon le rôle
 # -----------------------------------------------------------------------------
 if st.session_state["role"] == "teacher":
-    # Pour l'enseignant, on ajoute la page "Attribution de niveaux"
-    pages = ["Accueil", "Ajouter Élève", "Tableau de progression", "Attribution de niveaux", "Fiche Élève"]
+    # Pour l'enseignant, nous ajoutons "Attribution de niveaux" et "Hall of Fame"
+    pages = ["Accueil", "Ajouter Élève", "Tableau de progression", "Attribution de niveaux", "Hall of Fame", "Fiche Élève"]
 else:  # Mode Élève
-    pages = ["Accueil", "Tableau de progression", "Fiche Élève"]
+    pages = ["Accueil", "Tableau de progression", "Hall of Fame", "Fiche Élève"]
 
 choice = st.sidebar.radio("Navigation", pages)
 
@@ -258,6 +258,14 @@ images = {
       <rect width="100%" height="150" fill="#c0392b" />
       <text x="50%" y="50%" fill="#ffffff" font-size="36" text-anchor="middle" dy=".3em">
         Attribution de niveaux
+      </text>
+    </svg>
+    """,
+    "Hall of Fame": """
+    <svg width="100%" height="150" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100%" height="150" fill="#f1c40f" />
+      <text x="50%" y="50%" fill="#ffffff" font-size="36" text-anchor="middle" dy=".3em">
+        Hall of Fame
       </text>
     </svg>
     """
@@ -414,27 +422,58 @@ elif choice == "Attribution de niveaux":
                 })
                 st.success(f"Attribution ajoutée : {', '.join(selected_students)} +{level_to_add} niveaux.")
         
-        # Affichage des attributions en cours
+        # Affichage des attributions en attente
         if st.session_state["level_assignments"]:
             st.write("### Attributions en attente")
             for i, assignment in enumerate(st.session_state["level_assignments"]):
                 st.write(f"{i+1}. {', '.join(assignment['students'])} : +{assignment['levels']} niveaux")
             
             if st.button("Valider toutes les attributions"):
-                # Pour chaque attribution, mettre à jour le niveau et les points de compétence
                 for assignment in st.session_state["level_assignments"]:
                     for student in assignment["students"]:
                         idx = st.session_state["students"].index[st.session_state["students"]["Nom"] == student]
                         if len(idx) > 0:
                             idx = idx[0]
-                            # Ajout des niveaux et des points de compétence (+5 par niveau)
                             st.session_state["students"].at[idx, "Niveau"] += assignment["levels"]
                             st.session_state["students"].at[idx, "Points de Compétence"] += assignment["levels"] * 5
                 save_data(st.session_state["students"])
                 st.success("Les attributions ont été appliquées.")
-                # Réinitialiser la liste des attributions
                 st.session_state["level_assignments"] = []
         st.markdown('</div>', unsafe_allow_html=True)
+
+# -----------------------------------------------------------------------------
+# Page Hall of Fame (accessible à tous, modifiable uniquement par l'enseignant)
+# -----------------------------------------------------------------------------
+elif choice == "Hall of Fame":
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.markdown(images["Hall of Fame"], unsafe_allow_html=True)
+    st.header("🏆 Hall of Fame")
+    
+    # Initialisation du Hall of Fame si nécessaire
+    if "hall_of_fame" not in st.session_state:
+        st.session_state["hall_of_fame"] = [{"name": "", "achievement": ""} for _ in range(3)]
+    
+    # Modification réservée à l'enseignant
+    if st.session_state["role"] == "teacher":
+        st.subheader("Modifier le Hall of Fame")
+        with st.form("hall_of_fame_form"):
+            new_entries = []
+            for i in range(3):
+                st.write(f"### Élève {i+1}")
+                name = st.selectbox(f"Nom de l'élève {i+1}", options=st.session_state["students"]["Nom"].tolist(), key=f"hof_name_{i}")
+                achievement = st.text_area(f"Exploits de {name}", key=f"hof_achievement_{i}")
+                new_entries.append({"name": name, "achievement": achievement})
+            if st.form_submit_button("Enregistrer le Hall of Fame"):
+                st.session_state["hall_of_fame"] = new_entries
+                st.success("Hall of Fame mis à jour.")
+    
+    st.subheader("Les Exploits")
+    for entry in st.session_state["hall_of_fame"]:
+        if entry["name"]:
+            st.markdown(f"**{entry['name']}** : {entry['achievement']}")
+        else:
+            st.markdown("*Entrée vide*")
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
 # Page de la fiche élève
@@ -485,8 +524,8 @@ elif choice == "Fiche Élève":
                     st.session_state["students"].loc[
                         st.session_state["students"]["Nom"] == selected_student, "Niveau"
                     ] = new_level
-                    pouvoirs_anciens = str(student_data["Pouvoirs"]) if pd.notna(student_data["Pouvoirs"]) else ""
-                    nouveaux_pouvoirs = pouvoirs_anciens + ", " + selected_item if pouvoirs_anciens else selected_item
+                    anciens_pouvoirs = str(student_data["Pouvoirs"]) if pd.notna(student_data["Pouvoirs"]) else ""
+                    nouveaux_pouvoirs = anciens_pouvoirs + ", " + selected_item if anciens_pouvoirs else selected_item
                     st.session_state["students"].loc[
                         st.session_state["students"]["Nom"] == selected_student, "Pouvoirs"
                     ] = nouveaux_pouvoirs
@@ -529,8 +568,8 @@ elif choice == "Fiche Élève":
                     st.session_state["students"].loc[
                         st.session_state["students"]["Nom"] == selected_student, "Points de Compétence"
                     ] = new_points
-                    roles_anciens = str(student_data["Rôles"]) if pd.notna(student_data["Rôles"]) else ""
-                    nouveaux_roles = roles_anciens + ", " + selected_role if roles_anciens else selected_role
+                    anciens_roles = str(student_data["Rôles"]) if pd.notna(student_data["Rôles"]) else ""
+                    nouveaux_roles = anciens_roles + ", " + selected_role if anciens_roles else selected_role
                     st.session_state["students"].loc[
                         st.session_state["students"]["Nom"] == selected_student, "Rôles"
                     ] = nouveaux_roles
