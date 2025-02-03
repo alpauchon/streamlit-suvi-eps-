@@ -518,23 +518,25 @@ elif choice == "Leaderboard":
 # -----------------------------------------------------------------------------
 elif choice == "Vidéo du dernier cours":
     st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.markdown(images["Vidéo du dernier cours"], unsafe_allow_html=True)
     st.header("📹 Vidéo du dernier cours")
-    # Charger l'URL de la vidéo depuis le fichier JSON
-    video_url = load_video_link()
-    # Si l'utilisateur est enseignant, lui permettre de modifier la vidéo
+    
+    # Pour l'enseignant, permettre l'upload d'une vidéo depuis l'ordinateur
     if st.session_state["role"] == "teacher":
-        st.subheader("Modifier la vidéo")
-        with st.form("video_form"):
-            new_video_url = st.text_input("Entrez l'URL de la vidéo (YouTube, Vimeo, etc.)", value=video_url)
-            if st.form_submit_button("Enregistrer la vidéo"):
-                save_video_link(new_video_url)
-                st.success("Vidéo mise à jour.")
-                video_url = new_video_url
+        st.subheader("Ajouter ou mettre à jour la vidéo")
+        uploaded_file = st.file_uploader("Uploader une vidéo (format MP4)", type=["mp4"])
+        if uploaded_file is not None:
+            # Sauvegarde du fichier uploadé sur le disque
+            with open("uploaded_video.mp4", "wb") as f:
+                f.write(uploaded_file.getbuffer())
+            st.success("Vidéo téléchargée avec succès!")
+    
     # Affichage de la vidéo pour tous
-    if video_url:
-        st.video(video_url)
+    if os.path.exists("uploaded_video.mp4"):
+        st.video("uploaded_video.mp4")
     else:
-        st.info("Aucune vidéo n'a encore été enregistrée.")
+        st.info("Aucune vidéo n'a encore été téléchargée pour le dernier cours.")
+    
     st.markdown('</div>', unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
