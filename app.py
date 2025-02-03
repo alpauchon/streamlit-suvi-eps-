@@ -210,7 +210,8 @@ if not st.session_state["accepted_rules"]:
 # Définition des pages disponibles selon le rôle
 # -----------------------------------------------------------------------------
 if st.session_state["role"] == "teacher":
-    pages = ["Accueil", "Ajouter Élève", "Tableau de progression", "Fiche Élève"]
+    # Pour l'enseignant, on ajoute la page "Attribution de niveaux"
+    pages = ["Accueil", "Ajouter Élève", "Tableau de progression", "Attribution de niveaux", "Fiche Élève"]
 else:  # Mode Élève
     pages = ["Accueil", "Tableau de progression", "Fiche Élève"]
 
@@ -251,6 +252,14 @@ images = {
         Fiche de l'élève
       </text>
     </svg>
+    """,
+    "Attribution de niveaux": """
+    <svg width="100%" height="150" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100%" height="150" fill="#c0392b" />
+      <text x="50%" y="50%" fill="#ffffff" font-size="36" text-anchor="middle" dy=".3em">
+        Attribution de niveaux
+      </text>
+    </svg>
     """
 }
 
@@ -259,12 +268,10 @@ images = {
 # -----------------------------------------------------------------------------
 if choice == "Accueil":
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    # Affichage de l'image de la section Accueil
     st.markdown(images["Accueil"], unsafe_allow_html=True)
+    st.header("Bienvenue sur le Suivi EPS 🏆")
     st.write("Utilisez le menu à gauche pour naviguer entre les différentes sections de l'application.")
     st.markdown(f"**Mode d'accès :** {st.session_state['role'].capitalize()} ({st.session_state['user']})")
-    
-    # Bouton de téléchargement réservé à l'enseignant
     if st.session_state["role"] == "teacher":
         if st.download_button(
             "Télécharger le fichier CSV",
@@ -283,8 +290,8 @@ elif choice == "Ajouter Élève":
         st.error("Accès réservé aux enseignants.")
     else:
         st.markdown('<div class="card">', unsafe_allow_html=True)
-        # Affichage de l'image de la section Ajout d'élève
         st.markdown(images["Ajouter Élève"], unsafe_allow_html=True)
+        st.header("➕ Ajout des participant.e.s")
         with st.form("ajouter_eleve_form"):
             nom = st.text_input("Nom")
             niveau = st.number_input("Niveau de départ", min_value=0, max_value=10000, step=1)
@@ -318,7 +325,6 @@ elif choice == "Ajouter Élève":
                 [st.session_state["students"], new_data],
                 ignore_index=True
             )
-            # Reconvertir les colonnes numériques après ajout
             for col in ["Niveau", "Points de Compétence", "FAVEDS 🤸", "Stratégie 🧠", "Coopération 🤝", "Engagement 🌟"]:
                 st.session_state["students"][col] = pd.to_numeric(st.session_state["students"][col], errors="coerce").fillna(0).astype(int)
             save_data(st.session_state["students"])
@@ -330,10 +336,9 @@ elif choice == "Ajouter Élève":
 # -----------------------------------------------------------------------------
 elif choice == "Tableau de progression":
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    # Affichage de l'image de la section Tableau de progression
     st.markdown(images["Tableau de progression"], unsafe_allow_html=True)
+    st.header("📊 Tableau de progression")
     st.markdown("**Modifiez directement les valeurs dans le tableau ci-dessous.**")
-    # Fonction de validation de la somme des points attribués aux compétences
     def validate_competences(df):
         invalid = []
         for idx, row in df.iterrows():
@@ -372,7 +377,6 @@ elif choice == "Tableau de progression":
                 df = st.session_state["students"].copy()
                 idx = df.index[df["Nom"] == st.session_state["user"]]
                 if len(idx) > 0:
-                    # Remplacer uniquement la ligne de l'élève en utilisant idx[0]
                     df.loc[idx[0]] = edited_my_data.iloc[0]
                 st.session_state["students"] = df
                 save_data(st.session_state["students"])
@@ -380,12 +384,66 @@ elif choice == "Tableau de progression":
     st.markdown('</div>', unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
+# Page d'attribution de niveaux (enseignant uniquement)
+# -----------------------------------------------------------------------------
+elif choice == "Attribution de niveaux":
+    if st.session_state["role"] != "teacher":
+        st.error("Accès réservé aux enseignants.")
+    else:
+        st.markdown('<div class="card">', unsafe_allow_html=True)
+        st.markdown(images["Attribution de niveaux"], unsafe_allow_html=True)
+        st.header("Attribution rapide de niveaux")
+        st.write("Sélectionnez les élèves et le nombre de niveaux à ajouter. Pour chaque niveau attribué, 5 points de compétence sont automatiquement ajoutés.")
+        
+        # Initialisation de la liste d'attributions dans la session
+        if "level_assignments" not in st.session_state:
+            st.session_state["level_assignments"] = []
+        
+        # Formulaire pour ajouter une attribution
+        with st.form("form_attribution"):
+            selected_students = st.multiselect("Sélectionnez les élèves", options=st.session_state["students"]["Nom"].tolist())
+            level_to_add = st.selectbox("Nombre de niveaux à ajouter", options=[1, 2, 3, 4, 6, 8])
+            submit_assignment = st.form_submit_button("Ajouter à la liste")
+        
+        if submit_assignment:
+            if not selected_students:
+                st.error("Veuillez sélectionner au moins un élève.")
+            else:
+                st.session_state["level_assignments"].append({
+                    "students": selected_students,
+                    "levels": level_to_add
+                })
+                st.success(f"Attribution ajoutée : {', '.join(selected_students)} +{level_to_add} niveaux.")
+        
+        # Affichage des attributions en cours
+        if st.session_state["level_assignments"]:
+            st.write("### Attributions en attente")
+            for i, assignment in enumerate(st.session_state["level_assignments"]):
+                st.write(f"{i+1}. {', '.join(assignment['students'])} : +{assignment['levels']} niveaux")
+            
+            if st.button("Valider toutes les attributions"):
+                # Pour chaque attribution, mettre à jour le niveau et les points de compétence
+                for assignment in st.session_state["level_assignments"]:
+                    for student in assignment["students"]:
+                        idx = st.session_state["students"].index[st.session_state["students"]["Nom"] == student]
+                        if len(idx) > 0:
+                            idx = idx[0]
+                            # Ajout des niveaux et des points de compétence (+5 par niveau)
+                            st.session_state["students"].at[idx, "Niveau"] += assignment["levels"]
+                            st.session_state["students"].at[idx, "Points de Compétence"] += assignment["levels"] * 5
+                save_data(st.session_state["students"])
+                st.success("Les attributions ont été appliquées.")
+                # Réinitialiser la liste des attributions
+                st.session_state["level_assignments"] = []
+        st.markdown('</div>', unsafe_allow_html=True)
+
+# -----------------------------------------------------------------------------
 # Page de la fiche élève
 # -----------------------------------------------------------------------------
 elif choice == "Fiche Élève":
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    # Affichage de l'image de la section Fiche Élève
     st.markdown(images["Fiche Élève"], unsafe_allow_html=True)
+    st.header("🔍 Fiche de l'élève")
     if st.session_state["role"] == "teacher":
         selected_student = st.selectbox("Choisir un élève", st.session_state["students"]["Nom"])
     else:
