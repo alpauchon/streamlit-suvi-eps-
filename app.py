@@ -447,7 +447,6 @@ elif choice == "Attribution de niveaux":
 elif choice == "Hall of Fame":
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.markdown(images["Hall of Fame"], unsafe_allow_html=True)
-    st.header("🏆 Hall of Fame")
     
     # Initialisation du Hall of Fame si nécessaire
     if "hall_of_fame" not in st.session_state:
