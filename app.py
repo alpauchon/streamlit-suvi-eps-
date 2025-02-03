@@ -285,7 +285,6 @@ elif choice == "Ajouter Élève":
         st.markdown('<div class="card">', unsafe_allow_html=True)
         # Affichage de l'image de la section Ajout d'élève
         st.markdown(images["Ajouter Élève"], unsafe_allow_html=True)
-        st.header("➕ Ajout des participant.e.s")
         with st.form("ajouter_eleve_form"):
             nom = st.text_input("Nom")
             niveau = st.number_input("Niveau de départ", min_value=0, max_value=10000, step=1)
