@@ -1,5 +1,7 @@
 import streamlit as st
 import pandas as pd
+import json
+import os
 
 # -----------------------------------------------------------------------------
 # Configuration de la page et injection de CSS pour un design moderne
@@ -52,7 +54,24 @@ def rerun_app():
         st.error("La fonction de redémarrage automatique n'est pas disponible. Veuillez mettre à jour Streamlit.")
 
 # -----------------------------------------------------------------------------
-# Chargement des données
+# Fonctions de gestion du Hall of Fame (sauvegarde en JSON)
+# -----------------------------------------------------------------------------
+HOF_FILE = "hall_of_fame.json"
+
+def load_hof():
+    if os.path.exists(HOF_FILE):
+        with open(HOF_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    else:
+        # Initialisation par défaut de 3 entrées vides
+        return [{"name": "", "achievement": ""} for _ in range(3)]
+
+def save_hof(hof_data):
+    with open(HOF_FILE, "w", encoding="utf-8") as f:
+        json.dump(hof_data, f, ensure_ascii=False, indent=4)
+
+# -----------------------------------------------------------------------------
+# Chargement des données des élèves
 # -----------------------------------------------------------------------------
 def load_data():
     try:
@@ -447,10 +466,11 @@ elif choice == "Attribution de niveaux":
 elif choice == "Hall of Fame":
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.markdown(images["Hall of Fame"], unsafe_allow_html=True)
+    st.header("🏆 Hall of Fame")
     
-    # Initialisation du Hall of Fame si nécessaire
+    # Charger le Hall of Fame depuis le fichier si non présent en session
     if "hall_of_fame" not in st.session_state:
-        st.session_state["hall_of_fame"] = [{"name": "", "achievement": ""} for _ in range(3)]
+        st.session_state["hall_of_fame"] = load_hof()
     
     # Modification réservée à l'enseignant
     if st.session_state["role"] == "teacher":
@@ -464,6 +484,7 @@ elif choice == "Hall of Fame":
                 new_entries.append({"name": name, "achievement": achievement})
             if st.form_submit_button("Enregistrer le Hall of Fame"):
                 st.session_state["hall_of_fame"] = new_entries
+                save_hof(new_entries)
                 st.success("Hall of Fame mis à jour.")
     
     st.subheader("Les Exploits")
