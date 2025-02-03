@@ -51,13 +51,8 @@ h1, h2, h3 {
 """, unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# Fonction utilitaire pour redémarrer l'application
+# Suppression de la fonction de redémarrage automatique (non compatible avec votre version)
 # -----------------------------------------------------------------------------
-def rerun_app():
-    try:
-        st.experimental_rerun()
-    except Exception:
-        st.error("La fonction de redémarrage automatique n'est pas disponible. Veuillez mettre à jour Streamlit.")
 
 # -----------------------------------------------------------------------------
 # Fonctions de gestion du Hall of Fame (sauvegarde en JSON)
@@ -69,7 +64,7 @@ def load_hof():
         with open(HOF_FILE, "r", encoding="utf-8") as f:
             return json.load(f)
     else:
-        # Initialisation par défaut avec 3 entrées vides
+        # Initialisation par défaut de 3 entrées vides
         return [{"name": "", "achievement": ""} for _ in range(3)]
 
 def save_hof(hof_data):
@@ -77,7 +72,7 @@ def save_hof(hof_data):
         json.dump(hof_data, f, ensure_ascii=False, indent=4)
 
 # -----------------------------------------------------------------------------
-# Chargement et sauvegarde des données des élèves
+# Chargement des données des élèves
 # -----------------------------------------------------------------------------
 def load_data():
     try:
@@ -91,8 +86,10 @@ def load_data():
         df["Pouvoirs"] = df["Pouvoirs"].astype(str)
         for col in ["Niveau", "Points de Compétence", "FAVEDS 🤸", "Stratégie 🧠", "Coopération 🤝", "Engagement 🌟"]:
             df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0).astype(int)
+        print("[INFO] Données chargées avec succès.")
         return df
     except FileNotFoundError:
+        print("[WARNING] Fichier non trouvé, création d'un nouveau DataFrame.")
         return pd.DataFrame({
             "Nom": [], "Niveau": [], "Points de Compétence": [],
             "FAVEDS 🤸": [], "Stratégie 🧠": [], "Coopération 🤝": [], "Engagement 🌟": [],
@@ -102,12 +99,13 @@ def load_data():
 
 def save_data(df):
     df.to_csv("students_data.csv", index=False)
+    print("[INFO] Données sauvegardées.")
 
 if "students" not in st.session_state:
     st.session_state["students"] = load_data()
 
 # -----------------------------------------------------------------------------
-# Initialisation des variables de session pour l'accès
+# Initialisation des variables de session pour l'accès spécialisé
 # -----------------------------------------------------------------------------
 if "role" not in st.session_state:
     st.session_state["role"] = None
@@ -131,7 +129,6 @@ if st.session_state["role"] is None:
             if teacher_password == st.secrets["ACCESS_CODE"]:
                 st.session_state["role"] = "teacher"
                 st.session_state["user"] = "Enseignant"
-                st.session_state["do_rerun"] = True
                 st.success("Accès enseignant autorisé.")
             else:
                 st.error("Code incorrect.")
@@ -156,7 +153,6 @@ if st.session_state["role"] is None:
                         save_data(st.session_state["students"])
                         st.session_state["role"] = "student"
                         st.session_state["user"] = student_name
-                        st.session_state["do_rerun"] = True
                         st.success(f"Accès élève autorisé pour {student_name}.")
             else:
                 code_entered = st.text_input("Entrez votre code d'accès", type="password", key="existing_student_code")
@@ -166,12 +162,8 @@ if st.session_state["role"] is None:
                     else:
                         st.session_state["role"] = "student"
                         st.session_state["user"] = student_name
-                        st.session_state["do_rerun"] = True
                         st.success(f"Accès élève autorisé pour {student_name}.")
     st.markdown('</div>', unsafe_allow_html=True)
-    if st.session_state["do_rerun"]:
-        st.session_state["do_rerun"] = False
-        rerun_app()
     st.stop()
 
 # -----------------------------------------------------------------------------
@@ -190,18 +182,13 @@ if not st.session_state["accepted_rules"]:
     """)
     if st.button("OK, j'ai compris les règles", key="accept_rules"):
         st.session_state["accepted_rules"] = True
-        st.session_state["do_rerun"] = True
     st.markdown('</div>', unsafe_allow_html=True)
-    if st.session_state["do_rerun"]:
-        st.session_state["do_rerun"] = False
-        rerun_app()
     st.stop()
 
 # -----------------------------------------------------------------------------
-# Ajout d'une page Leaderboard pour stimuler la compétition
+# Leaderboard : classement des élèves par Points de Compétence
 # -----------------------------------------------------------------------------
 def get_leaderboard(df):
-    # Classement par points de compétences décroissants
     leaderboard = df.sort_values("Points de Compétence", ascending=False)
     return leaderboard[["Nom", "Niveau", "Points de Compétence"]]
 
@@ -287,15 +274,9 @@ if choice == "Accueil":
     st.write("Utilisez le menu à gauche pour naviguer entre les sections.")
     st.markdown(f"**Mode d'accès :** {st.session_state['role'].capitalize()} ({st.session_state['user']})")
     if st.session_state["role"] == "teacher":
-        if st.download_button(
-            "Télécharger le fichier CSV",
-            data=st.session_state["students"].to_csv(index=False),
-            file_name="students_data.csv",
-            mime="text/csv"
-        ):
+        if st.download_button("Télécharger le fichier CSV", data=st.session_state["students"].to_csv(index=False), file_name="students_data.csv", mime="text/csv"):
             st.success("Fichier téléchargé.")
     st.markdown('</div>', unsafe_allow_html=True)
-    # Animation ludique : ballons lors du chargement de la page d'accueil
     st.balloons()
 
 # -----------------------------------------------------------------------------
@@ -322,7 +303,6 @@ elif choice == "Ajouter Élève":
             cooperation = st.number_input("Coopération 🤝", min_value=0, max_value=remaining_points, step=1, value=0)
             remaining_points -= cooperation
             engagement = st.number_input("Engagement 🌟", min_value=0, max_value=remaining_points, step=1, value=remaining_points)
-            # Option d'ajout d'un avatar (simple URL ou choix prédéfini)
             avatar = st.text_input("URL de l'avatar (optionnel)")
             submit_eleve = st.form_submit_button("Ajouter l'élève")
         if submit_eleve and nom:
@@ -434,13 +414,14 @@ elif choice == "Hall of Fame":
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.markdown(images["Hall of Fame"], unsafe_allow_html=True)
     st.header("🏆 Hall of Fame")
-    # Toujours recharger le Hall of Fame depuis le fichier
+    # Recharger le Hall of Fame depuis le fichier
     hof_data = load_hof()
     st.session_state["hall_of_fame"] = hof_data
     if st.session_state["role"] == "teacher":
         st.subheader("Modifier le Hall of Fame")
         nb_entries = st.number_input("Nombre d'élèves à mettre en lumière", min_value=1, max_value=5, 
-                                     value=len(st.session_state["hall_of_fame"]) if st.session_state["hall_of_fame"] else 3, step=1)
+                                     value=len(st.session_state["hall_of_fame"]) if st.session_state["hall_of_fame"] else 3, 
+                                     step=1)
         with st.form("hall_of_fame_form"):
             new_entries = []
             for i in range(nb_entries):
@@ -464,7 +445,7 @@ elif choice == "Hall of Fame":
     st.markdown('</div>', unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# Page Leaderboard (classement des élèves par Points de Compétence)
+# Page Leaderboard
 # -----------------------------------------------------------------------------
 elif choice == "Leaderboard":
     st.markdown('<div class="card">', unsafe_allow_html=True)
@@ -493,7 +474,6 @@ elif choice == "Fiche Élève":
         with col1:
             st.write(f"**Niveau :** {student_data['Niveau']}")
             st.write(f"**Points de Compétence :** {student_data['Points de Compétence']}")
-            # Animation pour féliciter un élève lors d'une mise à niveau (optionnel)
             if st.button("Fêter ma progression"):
                 st.balloons()
         with col2:
