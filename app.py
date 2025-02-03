@@ -332,7 +332,6 @@ elif choice == "Tableau de progression":
     st.markdown('<div class="card">', unsafe_allow_html=True)
     # Affichage de l'image de la section Tableau de progression
     st.markdown(images["Tableau de progression"], unsafe_allow_html=True)
-    st.header("📊 Tableau de progression")
     st.markdown("**Modifiez directement les valeurs dans le tableau ci-dessous.**")
     # Fonction de validation de la somme des points attribués aux compétences
     def validate_competences(df):
@@ -387,7 +386,6 @@ elif choice == "Fiche Élève":
     st.markdown('<div class="card">', unsafe_allow_html=True)
     # Affichage de l'image de la section Fiche Élève
     st.markdown(images["Fiche Élève"], unsafe_allow_html=True)
-    st.header("🔍 Fiche de l'élève")
     if st.session_state["role"] == "teacher":
         selected_student = st.selectbox("Choisir un élève", st.session_state["students"]["Nom"])
     else:
