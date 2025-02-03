@@ -392,7 +392,6 @@ elif choice == "Attribution de niveaux":
     else:
         st.markdown('<div class="card">', unsafe_allow_html=True)
         st.markdown(images["Attribution de niveaux"], unsafe_allow_html=True)
-        st.header("Attribution rapide de niveaux")
         st.write("Sélectionnez les élèves et le nombre de niveaux à ajouter. Pour chaque niveau attribué, 5 points de compétence sont automatiquement ajoutés.")
         
         # Initialisation de la liste d'attributions dans la session
