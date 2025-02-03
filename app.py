@@ -51,7 +51,7 @@ h1, h2, h3 {
 """, unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# Suppression de la fonction de redémarrage automatique (non compatible avec votre version)
+# Suppression de la fonction de redémarrage automatique (non compatible)
 # -----------------------------------------------------------------------------
 
 # -----------------------------------------------------------------------------
@@ -64,7 +64,7 @@ def load_hof():
         with open(HOF_FILE, "r", encoding="utf-8") as f:
             return json.load(f)
     else:
-        # Initialisation par défaut de 3 entrées vides
+        # Initialisation par défaut avec 3 entrées vides
         return [{"name": "", "achievement": ""} for _ in range(3)]
 
 def save_hof(hof_data):
@@ -105,7 +105,7 @@ if "students" not in st.session_state:
     st.session_state["students"] = load_data()
 
 # -----------------------------------------------------------------------------
-# Initialisation des variables de session pour l'accès spécialisé
+# Initialisation des variables de session pour l'accès
 # -----------------------------------------------------------------------------
 if "role" not in st.session_state:
     st.session_state["role"] = None
@@ -113,8 +113,6 @@ if "user" not in st.session_state:
     st.session_state["user"] = None
 if "accepted_rules" not in st.session_state:
     st.session_state["accepted_rules"] = False
-if "do_rerun" not in st.session_state:
-    st.session_state["do_rerun"] = False
 
 # -----------------------------------------------------------------------------
 # Bloc d'accès spécialisé
@@ -186,7 +184,7 @@ if not st.session_state["accepted_rules"]:
     st.stop()
 
 # -----------------------------------------------------------------------------
-# Leaderboard : classement des élèves par Points de Compétence
+# Leaderboard : classement automatique des élèves par Points de Compétence
 # -----------------------------------------------------------------------------
 def get_leaderboard(df):
     leaderboard = df.sort_values("Points de Compétence", ascending=False)
@@ -445,13 +443,20 @@ elif choice == "Hall of Fame":
     st.markdown('</div>', unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# Page Leaderboard
+# Page Leaderboard (classement automatique par Points de Compétence)
 # -----------------------------------------------------------------------------
 elif choice == "Leaderboard":
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.markdown(images["Leaderboard"], unsafe_allow_html=True)
     st.header("🏆 Leaderboard")
+    # Tri automatique des élèves par points décroissants
     leaderboard = st.session_state["students"].sort_values("Points de Compétence", ascending=False)
+    # Affichage du top 3 avec une mise en avant ludique
+    st.subheader("Top 3")
+    top3 = leaderboard.head(3)
+    for rank, (_, row) in enumerate(top3.iterrows(), start=1):
+        st.markdown(f"**{rank}. {row['Nom']}** - Niveau: {row['Niveau']} - Points: {row['Points de Compétence']} :trophy:")
+    st.subheader("Classement complet")
     st.dataframe(leaderboard[["Nom", "Niveau", "Points de Compétence"]])
     st.markdown('</div>', unsafe_allow_html=True)
 
