@@ -521,23 +521,33 @@ elif choice == "Vidéo du dernier cours":
     st.markdown(images["Vidéo du dernier cours"], unsafe_allow_html=True)
     st.header("📹 Vidéo du dernier cours")
     
-    # Pour l'enseignant, permettre l'upload d'une vidéo depuis l'ordinateur
+    video_filename = "uploaded_video.mp4"
+    
+    # Pour l'enseignant : possibilité d'uploader ou de retirer la vidéo
     if st.session_state["role"] == "teacher":
-        st.subheader("Ajouter ou mettre à jour la vidéo")
+        st.subheader("Gérer la vidéo")
         uploaded_file = st.file_uploader("Uploader une vidéo (format MP4)", type=["mp4"])
-        if uploaded_file is not None:
-            # Sauvegarde du fichier uploadé sur le disque
-            with open("uploaded_video.mp4", "wb") as f:
-                f.write(uploaded_file.getbuffer())
-            st.success("Vidéo téléchargée avec succès!")
+        col1, col2 = st.columns(2)
+        with col1:
+            if uploaded_file is not None:
+                # Sauvegarde du fichier uploadé sur le disque
+                with open(video_filename, "wb") as f:
+                    f.write(uploaded_file.getbuffer())
+                st.success("Vidéo téléchargée avec succès!")
+        with col2:
+            if os.path.exists(video_filename):
+                if st.button("Retirer la vidéo"):
+                    os.remove(video_filename)
+                    st.success("Vidéo retirée avec succès!")
     
     # Affichage de la vidéo pour tous
-    if os.path.exists("uploaded_video.mp4"):
-        st.video("uploaded_video.mp4")
+    if os.path.exists(video_filename):
+        st.video(video_filename)
     else:
         st.info("Aucune vidéo n'a encore été téléchargée pour le dernier cours.")
     
     st.markdown('</div>', unsafe_allow_html=True)
+
 
 # -----------------------------------------------------------------------------
 # Page de la fiche élève
