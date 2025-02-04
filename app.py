@@ -366,7 +366,6 @@ elif choice == "Ajouter Élève":
                 "Rôles": ["Apprenti(e)"],
                 "Pouvoirs": [""],
                 "StudentCode": [""],
-                "Avatar": [avatar]
             })
             st.session_state["students"] = pd.concat([st.session_state["students"], new_data], ignore_index=True)
             for col in ["Niveau", "Points de Compétence", "FAVEDS 🤸", "Stratégie 🧠", "Coopération 🤝", "Engagement 🌟"]:
