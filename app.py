@@ -351,7 +351,6 @@ elif choice == "Ajouter Élève":
             cooperation = st.number_input("Coopération 🤝", min_value=0, max_value=remaining_points, step=1, value=0)
             remaining_points -= cooperation
             engagement = st.number_input("Engagement 🌟", min_value=0, max_value=remaining_points, step=1, value=remaining_points)
-            avatar = st.text_input("URL de l'avatar (optionnel)")
             submit_eleve = st.form_submit_button("Ajouter l'élève")
         if submit_eleve and nom:
             new_data = pd.DataFrame({
