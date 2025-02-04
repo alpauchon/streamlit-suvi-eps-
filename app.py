@@ -319,7 +319,6 @@ if choice == "Accueil":
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.markdown(images["Accueil"], unsafe_allow_html=True)
     st.header("Bienvenue sur Suivi EPS 🏆")
-    st.markdown(svg_image, unsafe_allow_html=True)
     st.write("Utilisez le menu à gauche pour naviguer entre les sections.")
     st.markdown(f"**Mode d'accès :** {st.session_state['role'].capitalize()} ({st.session_state['user']})")
     if st.session_state["role"] == "teacher":
