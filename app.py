@@ -194,31 +194,6 @@ if not st.session_state["accepted_rules"]:
     - 1 niveau = 5 points de compétences.
     - Chaque élève peut se spécialiser dans 2 compétences uniquement.
     - L'élève peut acheter des pouvoirs ou des rôles avec ses niveaux et compétences.
-
-      ### 🏪 Boutique des rôles et pouvoirs
-    | Rôles | Points nécessaires | Compétences requises | Explication |
-    |---|---|---|---|
-    | Testeur.euse | 200 | FAVEDS | Peut essayer en premier les nouveaux exercices. |
-    | Démonstrateur.rice | 150 | FAVEDS + Engagement | Présente les mouvements au reste du groupe. |
-    | Facilitateur.rice | 150 | Coopération + Engagement | Moins de répétitions imposées s’il maîtrise déjà l’exercice. |
-    | Créateur.rice de règles | 250 | Stratégie | Peut modifier certaines règles des exercices. |
-    | Meneur.euse tactique | 250 | Stratégie + Coopération | Oriente une équipe et propose des stratégies. |
-    | Arbitre / Régulateur.rice | 300 | Stratégie + Engagement | Aide à gérer les litiges et les décisions collectives. |
-    | Aide-coach | 250 | Coopération + Engagement | Peut accompagner un élève en difficulté. |
-    | Coordinateur.rice de groupe | 300 | Coopération | Premier choix des groupes. |
-    | Facilitateur.rice (social) | 250 | Coopération + Engagement | Peut proposer des ajustements pour favoriser l’intégration de tous. |
-    | Réducteur.rice des contraintes | 200 | FAVEDS + Engagement | Accès à des versions simplifiées ou allégées des consignes. |
-    | Autonome | 200 | Stratégie + Engagement | Peut choisir son propre parcours ou défi. |
-    | Responsable de séance | 350 | Stratégie + Coopération + Engagement | Peut diriger une partie de la séance. |
-    
-    ### 🏪 Boutique secrète
-    | Coût en niveau | Pouvoirs à choix |
-    |---|---|
-    | 40 | Le malin / la maligne : doubler ses niveaux gagnés à chaque cours. |
-    | 50 | Choix d’un jeu (5 min) ou donner 20 niveaux à quelqu’un. |
-    | 100 | Maître.sse des groupes pour une séance de 1h30 ou doubler ses points de compétences. |
-    | 150 | Maître.sse du thème d’une prochaine séance. |
-    | 300 | Roi / Reine de la séquence (permet de choisir le prochain thème que l’on fera pour 4 à 6 cours). |
     """)
     if st.button("OK, j'ai compris les règles", key="accept_rules"):
         st.session_state["accepted_rules"] = True
@@ -518,36 +493,24 @@ elif choice == "Leaderboard":
 # -----------------------------------------------------------------------------
 elif choice == "Vidéo du dernier cours":
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.markdown(images["Vidéo du dernier cours"], unsafe_allow_html=True)
     st.header("📹 Vidéo du dernier cours")
-    
-    video_filename = "uploaded_video.mp4"
-    
-    # Pour l'enseignant : possibilité d'uploader ou de retirer la vidéo
+    # Charger l'URL de la vidéo depuis le fichier JSON
+    video_url = load_video_link()
+    # Si l'utilisateur est enseignant, lui permettre de modifier la vidéo
     if st.session_state["role"] == "teacher":
-        st.subheader("Gérer la vidéo")
-        uploaded_file = st.file_uploader("Uploader une vidéo (format MP4)", type=["mp4"])
-        col1, col2 = st.columns(2)
-        with col1:
-            if uploaded_file is not None:
-                # Sauvegarde du fichier uploadé sur le disque
-                with open(video_filename, "wb") as f:
-                    f.write(uploaded_file.getbuffer())
-                st.success("Vidéo téléchargée avec succès!")
-        with col2:
-            if os.path.exists(video_filename):
-                if st.button("Retirer la vidéo"):
-                    os.remove(video_filename)
-                    st.success("Vidéo retirée avec succès!")
-    
+        st.subheader("Modifier la vidéo")
+        with st.form("video_form"):
+            new_video_url = st.text_input("Entrez l'URL de la vidéo (YouTube, Vimeo, etc.)", value=video_url)
+            if st.form_submit_button("Enregistrer la vidéo"):
+                save_video_link(new_video_url)
+                st.success("Vidéo mise à jour.")
+                video_url = new_video_url
     # Affichage de la vidéo pour tous
-    if os.path.exists(video_filename):
-        st.video(video_filename)
+    if video_url:
+        st.video(video_url)
     else:
-        st.info("Aucune vidéo n'a encore été téléchargée pour le dernier cours.")
-    
+        st.info("Aucune vidéo n'a encore été enregistrée.")
     st.markdown('</div>', unsafe_allow_html=True)
-
 
 # -----------------------------------------------------------------------------
 # Page de la fiche élève
@@ -588,24 +551,18 @@ elif choice == "Fiche Élève":
             selected_item = st.selectbox("🛍️ Choisir un pouvoir", list(store_items.keys()), key="pouvoirs")
             cost = store_items[selected_item]
             st.info(f"💰 Coût: {cost} niveaux")
-
-if st.button("Acheter ce pouvoir", key="acheter_pouvoir"):
-    if int(student_data["Niveau"]) >= cost:
-        current_level = int(student_data["Niveau"])
-        new_level = current_level - cost
-        st.session_state["students"].loc[
-            st.session_state["students"]["Nom"] == selected_student, "Niveau"
-        ] = new_level
-        anciens_pouvoirs = str(student_data["Pouvoirs"]) if pd.notna(student_data["Pouvoirs"]) else ""
-        nouveaux_pouvoirs = anciens_pouvoirs + ", " + selected_item if anciens_pouvoirs else selected_item
-        st.session_state["students"].loc[
-            st.session_state["students"]["Nom"] == selected_student, "Pouvoirs"
-        ] = nouveaux_pouvoirs  # Utilisation de la variable corrigée
-        save_data(st.session_state["students"])
-        st.success(f"🛍️ {selected_student} a acheté '{selected_item}'.")
-    else:
-        st.error("❌ Niveaux insuffisants !")
-
+            if st.button("Acheter ce pouvoir", key="acheter_pouvoir"):
+                if int(student_data["Niveau"]) >= cost:
+                    current_level = int(student_data["Niveau"])
+                    new_level = current_level - cost
+                    st.session_state["students"].loc[st.session_state["students"]["Nom"] == selected_student, "Niveau"] = new_level
+                    anciens_pouvoirs = str(student_data["Pouvoirs"]) if pd.notna(student_data["Pouvoirs"]) else ""
+                    nouveaux_pouvoirs = anciens_pouvoirs + ", " + selected_item if anciens_pouvoirs else selected_item
+                    st.session_state["students"].loc[st.session_state["students"]["Nom"] == selected_student, "Pouvoirs"] = nouveaux_roles
+                    save_data(st.session_state["students"])
+                    st.success(f"🛍️ {selected_student} a acheté '{selected_item}'.")
+                else:
+                    st.error("❌ Niveaux insuffisants !")
             st.markdown('</div>', unsafe_allow_html=True)
         with onglets[1]:
             st.markdown('<div class="card">', unsafe_allow_html=True)
