@@ -47,8 +47,27 @@ body {
 h1, h2, h3 {
     color: #2c3e50;
 }
+
+/* Footer fixe */
+.footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #2c3e50;
+    color: white;
+    text-align: center;
+    padding: 5px;
+    font-size: 12px;
+    font-weight: bold;
+}
 </style>
+
+<div class="footer">
+    © 2025 - Créé par Al Pauchon
+</div>
 """, unsafe_allow_html=True)
+
 
 # -----------------------------------------------------------------------------
 # Suppression de la fonction de redémarrage automatique (non compatible)
