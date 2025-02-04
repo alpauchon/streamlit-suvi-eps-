@@ -588,7 +588,10 @@ elif choice == "Fiche Élève":
             selected_item = st.selectbox("🛍️ Choisir un pouvoir", list(store_items.keys()), key="pouvoirs")
             cost = store_items[selected_item]
             st.info(f"💰 Coût: {cost} niveaux")
-        if st.button("Acheter ce pouvoir", key="acheter_pouvoir"):
+
+
+    
+      if st.button("Acheter ce pouvoir", key="acheter_pouvoir"):
     if int(student_data["Niveau"]) >= cost:
         current_level = int(student_data["Niveau"])
         new_level = current_level - cost
@@ -599,11 +602,12 @@ elif choice == "Fiche Élève":
         nouveaux_pouvoirs = anciens_pouvoirs + ", " + selected_item if anciens_pouvoirs else selected_item
         st.session_state["students"].loc[
             st.session_state["students"]["Nom"] == selected_student, "Pouvoirs"
-        ] = nouveaux_pouvoirs  # Correction ici : utilise nouveaux_pouvoirs
+        ] = nouveaux_pouvoirs  # Utilisation de la variable corrigée
         save_data(st.session_state["students"])
         st.success(f"🛍️ {selected_student} a acheté '{selected_item}'.")
     else:
         st.error("❌ Niveaux insuffisants !")
+
 
 
             st.markdown('</div>', unsafe_allow_html=True)
