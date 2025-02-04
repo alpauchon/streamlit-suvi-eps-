@@ -647,3 +647,12 @@ elif choice == "Fiche Élève":
                     st.error("❌ Points de compétence insuffisants ou compétences requises non atteintes !")
             st.markdown('</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
+
+# -----------------------------------------------------------------------------
+# Copyright / Footer
+# -----------------------------------------------------------------------------
+st.markdown("""
+<hr style="border:1px solid gray">  
+<center><small>© 2025 - Créé par Al Pauchon</small></center>
+""", unsafe_allow_html=True)
+
