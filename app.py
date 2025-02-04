@@ -552,20 +552,20 @@ elif choice == "Fiche Élève":
             cost = store_items[selected_item]
             st.info(f"💰 Coût: {cost} niveaux")
         if st.button("Acheter ce pouvoir", key="acheter_pouvoir"):
-    if int(student_data["Niveau"]) >= cost:
-        current_level = int(student_data["Niveau"])
-        new_level = current_level - cost
-        st.session_state["students"].loc[
+            if int(student_data["Niveau"]) >= cost:
+            current_level = int(student_data["Niveau"])
+            new_level = current_level - cost
+            st.session_state["students"].loc[
             st.session_state["students"]["Nom"] == selected_student, "Niveau"
         ] = new_level
-        anciens_pouvoirs = str(student_data["Pouvoirs"]) if pd.notna(student_data["Pouvoirs"]) else ""
-        nouveaux_pouvoirs = anciens_pouvoirs + ", " + selected_item if anciens_pouvoirs else selected_item
-        st.session_state["students"].loc[
+            anciens_pouvoirs = str(student_data["Pouvoirs"]) if pd.notna(student_data["Pouvoirs"]) else ""
+            nouveaux_pouvoirs = anciens_pouvoirs + ", " + selected_item if anciens_pouvoirs else selected_item
+            st.session_state["students"].loc[
             st.session_state["students"]["Nom"] == selected_student, "Pouvoirs"
-        ] = nouveaux_pouvoirs  # Utilisez "nouveaux_pouvoirs" ici, et non "nouveaux_roles"
-        save_data(st.session_state["students"])
-        st.success(f"🛍️ {selected_student} a acheté '{selected_item}'.")
-    else:
+            ] = nouveaux_pouvoirs  # Utilisez "nouveaux_pouvoirs" ici, et non "nouveaux_roles"
+            save_data(st.session_state["students"])
+            st.success(f"🛍️ {selected_student} a acheté '{selected_item}'.")
+        else:
         st.error("❌ Niveaux insuffisants !")
             st.markdown('</div>', unsafe_allow_html=True)
         with onglets[1]:
