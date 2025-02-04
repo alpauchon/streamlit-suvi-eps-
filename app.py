@@ -111,7 +111,6 @@ def load_data():
             "Nom": [], "Niveau": [], "Points de Compétence": [],
             "FAVEDS 🤸": [], "Stratégie 🧠": [], "Coopération 🤝": [], "Engagement 🌟": [],
             "Rôles": [], "Pouvoirs": [], "StudentCode": [],
-            "Avatar": []  # Option pour avatar personnalisé
         })
 
 def save_data(df):
@@ -487,18 +486,8 @@ elif choice == "Hall of Fame":
     st.subheader("Les Exploits")
     for entry in st.session_state["hall_of_fame"]:
         if entry["name"]:
-            # Recherche dans la DataFrame pour obtenir l'URL de l'avatar
-            student_info = st.session_state["students"].loc[st.session_state["students"]["Nom"] == entry["name"]]
-            if not student_info.empty:
-                avatar_url = student_info.iloc[0].get("Avatar", "")
-                if avatar_url:
-                    st.image(avatar_url, width=100)
-            st.markdown(f"**{entry['name']}** : {entry['achievement']}")
-        else:
-            st.markdown("*Entrée vide*")
-    st.markdown('</div>', unsafe_allow_html=True)
 
-
+            
 # -----------------------------------------------------------------------------
 # Page Leaderboard (classement automatique par Points de Compétence)
 # -----------------------------------------------------------------------------
