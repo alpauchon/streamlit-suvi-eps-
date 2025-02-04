@@ -111,7 +111,6 @@ def load_data():
             "Nom": [], "Niveau": [], "Points de Compétence": [],
             "FAVEDS 🤸": [], "Stratégie 🧠": [], "Coopération 🤝": [], "Engagement 🌟": [],
             "Rôles": [], "Pouvoirs": [], "StudentCode": [],
-            "Avatar": []  # Option pour avatar personnalisé
         })
 
 def save_data(df):
