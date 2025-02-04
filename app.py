@@ -606,9 +606,6 @@ if st.button("Acheter ce pouvoir", key="acheter_pouvoir"):
     else:
         st.error("❌ Niveaux insuffisants !")
 
-
-
-
             st.markdown('</div>', unsafe_allow_html=True)
         with onglets[1]:
             st.markdown('<div class="card">', unsafe_allow_html=True)
