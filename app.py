@@ -648,6 +648,8 @@ elif choice == "Fiche Élève":
             st.markdown('</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
+
+
 # -----------------------------------------------------------------------------
 # Gestion des questions posées par les élèves
 # -----------------------------------------------------------------------------
