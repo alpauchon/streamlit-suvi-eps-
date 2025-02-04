@@ -192,7 +192,7 @@ if not st.session_state["accepted_rules"]:
       - 1 niveau pour le fair-play, le respect, l’investissement et l’atteinte des objectifs.
     - Tous les élèves commencent avec le rôle **d’Apprenti(e)**.
     - 1 niveau = 5 points de compétences.
-    - Chaque élève peut se spécialiser dans 2 compétences uniquement.
+    - Chaque élève peut se spécialiser dans 3 compétences uniquement.
     - L'élève peut acheter des pouvoirs ou des rôles avec ses niveaux et compétences.
     """)
     if st.button("OK, j'ai compris les règles", key="accept_rules"):
