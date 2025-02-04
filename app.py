@@ -319,6 +319,47 @@ if choice == "Accueil":
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.markdown(images["Accueil"], unsafe_allow_html=True)
     st.header("Bienvenue sur Suivi EPS 🏆")
+    # Affichage de l'image SVG personnalisée
+svg_image = """
+<svg width="100%" height="150" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fond dégradé -->
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#2980b9;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#27ae60;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="100%" height="150" fill="url(#grad1)" />
+  
+  <!-- Titre -->
+  <text x="50%" y="40%" fill="#ffffff" font-size="24" font-family="Segoe UI, sans-serif" text-anchor="middle">
+    Compétition des Niveaux
+  </text>
+  
+  <!-- Sous-titre -->
+  <text x="50%" y="60%" fill="#ecf0f1" font-size="16" font-family="Segoe UI, sans-serif" text-anchor="middle">
+    Gagnez des points, progressez, devenez le meilleur !
+  </text>
+  
+  <!-- Icône de trophée -->
+  <g>
+    <rect x="45" y="70" width="20" height="15" fill="#f1c40f" stroke="#ffffff" stroke-width="2"/>
+    <rect x="42" y="85" width="6" height="10" fill="#f1c40f" stroke="#ffffff" stroke-width="2"/>
+    <rect x="52" y="85" width="6" height="10" fill="#f1c40f" stroke="#ffffff" stroke-width="2"/>
+  </g>
+  
+  <!-- Barre de progression symbolique -->
+  <rect x="20" y="110" width="260" height="10" fill="#bdc3c7" rx="5" ry="5"/>
+  <rect x="20" y="110" width="180" height="10" fill="#27ae60" rx="5" ry="5"/>
+  
+  <!-- Message final -->
+  <text x="50%" y="140" fill="#ffffff" font-size="14" font-family="Segoe UI, sans-serif" text-anchor="middle">
+    Gagnez des niveaux et cumulez vos points !
+  </text>
+</svg>
+"""
+st.markdown(svg_image, unsafe_allow_html=True)
+
     st.write("Utilisez le menu à gauche pour naviguer entre les sections.")
     st.markdown(f"**Mode d'accès :** {st.session_state['role'].capitalize()} ({st.session_state['user']})")
     if st.session_state["role"] == "teacher":
