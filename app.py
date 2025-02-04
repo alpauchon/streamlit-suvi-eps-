@@ -141,7 +141,7 @@ if st.session_state["role"] is None:
     if access_mode == "Enseignant":
         teacher_password = st.text_input("Entrez le code d'accès enseignant :", type="password")
         if st.button("Se connecter comme enseignant", key="teacher_conn"):
-            if teacher_password == st.secrets["ACCESS_CODE"]:
+            if teacher_password == st.secrets["tomate"]:
                 st.session_state["role"] = "teacher"
                 st.session_state["user"] = "Enseignant"
                 st.success("Accès enseignant autorisé.")
