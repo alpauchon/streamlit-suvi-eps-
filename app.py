@@ -111,6 +111,7 @@ def load_data():
             "Nom": [], "Niveau": [], "Points de Compétence": [],
             "FAVEDS 🤸": [], "Stratégie 🧠": [], "Coopération 🤝": [], "Engagement 🌟": [],
             "Rôles": [], "Pouvoirs": [], "StudentCode": [],
+            "Avatar": []  # Option pour avatar personnalisé
         })
 
 def save_data(df):
@@ -351,7 +352,7 @@ elif choice == "Ajouter Élève":
             cooperation = st.number_input("Coopération 🤝", min_value=0, max_value=remaining_points, step=1, value=0)
             remaining_points -= cooperation
             engagement = st.number_input("Engagement 🌟", min_value=0, max_value=remaining_points, step=1, value=remaining_points)
-          
+            avatar = st.text_input("URL de l'avatar (optionnel)")
             submit_eleve = st.form_submit_button("Ajouter l'élève")
         if submit_eleve and nom:
             new_data = pd.DataFrame({
@@ -365,6 +366,7 @@ elif choice == "Ajouter Élève":
                 "Rôles": ["Apprenti(e)"],
                 "Pouvoirs": [""],
                 "StudentCode": [""],
+                "Avatar": [avatar]
             })
             st.session_state["students"] = pd.concat([st.session_state["students"], new_data], ignore_index=True)
             for col in ["Niveau", "Points de Compétence", "FAVEDS 🤸", "Stratégie 🧠", "Coopération 🤝", "Engagement 🌟"]:
@@ -486,8 +488,18 @@ elif choice == "Hall of Fame":
     st.subheader("Les Exploits")
     for entry in st.session_state["hall_of_fame"]:
         if entry["name"]:
+            # Recherche dans la DataFrame pour obtenir l'URL de l'avatar
+            student_info = st.session_state["students"].loc[st.session_state["students"]["Nom"] == entry["name"]]
+            if not student_info.empty:
+                avatar_url = student_info.iloc[0].get("Avatar", "")
+                if avatar_url:
+                    st.image(avatar_url, width=100)
+            st.markdown(f"**{entry['name']}** : {entry['achievement']}")
+        else:
+            st.markdown("*Entrée vide*")
+    st.markdown('</div>', unsafe_allow_html=True)
 
-            
+
 # -----------------------------------------------------------------------------
 # Page Leaderboard (classement automatique par Points de Compétence)
 # -----------------------------------------------------------------------------
