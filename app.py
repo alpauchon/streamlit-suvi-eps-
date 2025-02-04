@@ -188,17 +188,43 @@ if not st.session_state["accepted_rules"]:
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.title("📜 Règles du système")
     st.markdown("""
-    - L’élève peut gagner **4 niveaux** par séance de 45 minutes.
-      - 1 niveau pour le fair-play, le respect, l’investissement et l’atteinte des objectifs.
-    - Tous les élèves commencent avec le rôle **d’Apprenti(e)**.
-    - 1 niveau = 5 points de compétences.
-    - Chaque élève peut se spécialiser dans 3 compétences uniquement.
-    - L'élève peut acheter des pouvoirs ou des rôles avec ses niveaux et compétences.
+- L’élève peut gagner **4 niveaux** par séance de 45 minutes.
+  - 1 niveau pour le fair-play, le respect, l’investissement et l’atteinte des objectifs.
+- Tous les élèves commencent avec le rôle **d’Apprenti(e)**.
+- 1 niveau = 5 points de compétences.
+- Chaque élève peut se spécialiser dans **3 compétences** uniquement.
+- L'élève peut acheter des pouvoirs ou des rôles avec ses niveaux et compétences.
+
+### Boutique des rôles et pouvoirs
+| Rôles                         | Points nécessaires | Compétences requises           | Explication                                               |
+|-------------------------------|--------------------|--------------------------------|-----------------------------------------------------------|
+| Testeur.euse                  | 200                | FAVEDS                         | Peut essayer en premier les nouveaux exercices.         |
+| Démonstrateur.rice            | 150                | FAVEDS + Engagement            | Présente les mouvements au reste du groupe.             |
+| Facilitateur.rice             | 150                | Coopération + Engagement       | Moins de répétitions imposées s’il maîtrise déjà l’exercice.|
+| Créateur.rice de règles       | 250                | Stratégie                      | Peut modifier certaines règles des exercices.           |
+| Meneur.euse tactique          | 250                | Stratégie + Coopération        | Oriente une équipe et propose des stratégies.           |
+| Arbitre / Régulateur.rice     | 300                | Stratégie + Engagement         | Aide à gérer les litiges et décisions collectives.        |
+| Aide-coach                    | 250                | Coopération + Engagement       | Peut accompagner un élève en difficulté.                |
+| Coordinateur.rice de groupe   | 300                | Coopération                    | Premier choix des groupes.                                |
+| Facilitateur.rice (social)     | 250                | Coopération + Engagement       | Favorise l’intégration de tous.                           |
+| Réducteur.rice des contraintes| 200                | FAVEDS + Engagement            | Accès à des versions simplifiées des consignes.           |
+| Autonome                      | 200                | Stratégie + Engagement         | Peut choisir son propre parcours ou défi.               |
+| Responsable de séance         | 350                | Stratégie + Coopération + Engagement | Peut diriger une partie de la séance.              |
+
+### Boutique secrète
+| Coût en niveau | Pouvoirs à choix                                                                                   |
+|---------------|----------------------------------------------------------------------------------------------------|
+| 40            | Le malin / la maligne : doubler ses niveaux gagnés à chaque cours.                                 |
+| 50            | Choix d’un jeu (5 min) ou donner 20 niveaux à quelqu’un.                                            |
+| 100           | Maître.sse des groupes pour une séance de 1h30 ou doubler ses points de compétences.                 |
+| 150           | Maître.sse du thème d’une prochaine séance.                                                        |
+| 300           | Roi / Reine de la séquence : permet de choisir le prochain thème pour 4 à 6 cours.                   |
     """)
     if st.button("OK, j'ai compris les règles", key="accept_rules"):
         st.session_state["accepted_rules"] = True
     st.markdown('</div>', unsafe_allow_html=True)
     st.stop()
+
 
 # -----------------------------------------------------------------------------
 # Leaderboard : classement automatique des élèves par Points de Compétence
