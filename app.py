@@ -525,8 +525,8 @@ elif choice == "Leaderboard":
     st.header("🏆 Leaderboard")
     # Tri automatique des élèves par points décroissants
     leaderboard = st.session_state["students"].sort_values("Points de Compétence", ascending=False)
-    st.subheader("Top 5")
-    top3 = leaderboard.head(5)
+    st.subheader("Top 10")
+    top3 = leaderboard.head(10)
     for rank, (_, row) in enumerate(top3.iterrows(), start=1):
         st.markdown(
             f"**{rank}. {row['Nom']}** - Niveau: {row['Niveau']} - Points: {row['Points de Compétence']}<br>"
