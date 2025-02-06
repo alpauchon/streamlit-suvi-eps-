@@ -206,12 +206,14 @@ if not st.session_state["accepted_rules"]:
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.title("📜 Règles du système")
     st.markdown("""
+- **L'utilisation du site n'est en aucun cas obligatoire, l'expérience durant les cours d'éducation physique sportive et artistique restera la même.**
 - L’élève peut gagner **4 niveaux** par séance de 45 minutes.
   - 1 niveau pour le fair-play, le respect, l’investissement et l’atteinte des objectifs.
 - Tous les élèves commencent avec le rôle **d’Apprenti(e)**.
 - 1 niveau = 5 points de compétences.
 - Chaque élève peut se spécialiser dans **3 compétences** uniquement.
 - L'élève peut acheter des pouvoirs ou des rôles avec ses niveaux et compétences.
+- **L'élève n'a pas le droit de se rajouter des niveaux ou points de compétence sous peine d'exclusion immédiate**. 
 
 ### Boutique des rôles et pouvoirs
 | Rôles                         | Points nécessaires | Compétences requises           | Explication                                               |
