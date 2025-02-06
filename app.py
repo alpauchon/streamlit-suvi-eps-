@@ -206,10 +206,6 @@ if not st.session_state["accepted_rules"]:
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.title("📜 Règles du système")
     st.markdown("""
-# -----------------------------------------------------------------------------
-# Règles du système
-# -----------------------------------------------------------------------------
-
 - **L'utilisation du site n'est en aucun cas obligatoire, l'expérience durant les cours d'éducation physique sportive et artistique restera la même.**
 - L’élève peut gagner **4 niveaux** par séance de 45 minutes.
   - 1 niveau pour le fair-play, le respect, l’investissement et l’atteinte des objectifs.
