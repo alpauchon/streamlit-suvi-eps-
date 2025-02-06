@@ -206,14 +206,42 @@ if not st.session_state["accepted_rules"]:
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.title("📜 Règles du système")
     st.markdown("""
+# -----------------------------------------------------------------------------
+# Règles du système
+# -----------------------------------------------------------------------------
+
 - **L'utilisation du site n'est en aucun cas obligatoire, l'expérience durant les cours d'éducation physique sportive et artistique restera la même.**
 - L’élève peut gagner **4 niveaux** par séance de 45 minutes.
   - 1 niveau pour le fair-play, le respect, l’investissement et l’atteinte des objectifs.
 - Tous les élèves commencent avec le rôle **d’Apprenti(e)**.
-- 1 niveau = 5 points de compétences.
+- 1 niveau = **5 points de compétences**.
 - Chaque élève peut se spécialiser dans **3 compétences** uniquement.
 - L'élève peut acheter des pouvoirs ou des rôles avec ses niveaux et compétences.
-- **L'élève n'a pas le droit de se rajouter des niveaux ou points de compétence sous peine d'exclusion immédiate**. 
+- **L'élève n'a pas le droit de se rajouter des niveaux ou points de compétence sous peine d'exclusion immédiate**.
+
+### 🔹 Accès et utilisation
+- **Le site est un outil pédagogique** et ne doit pas être utilisé pour nuire aux autres ou perturber le déroulement des séances.
+- **L’accès à son compte est personnel** et ne doit pas être partagé avec d’autres élèves.
+
+### 🔹 Attribution et gestion des niveaux
+- Un élève peut **proposer une auto-évaluation** de ses niveaux, mais la validation finale revient à l’enseignant.
+- **Le gain de niveaux dépend de critères précis** (fair-play, investissement, progrès…). **Aucun niveau n'est automatique.**
+- **L'élève ne peut pas dépasser un écart de 10 niveaux avec la moyenne de la classe** afin d’éviter un déséquilibre trop important.
+
+### 🔹 Sécurité et fair-play
+- **Le harcèlement ou l'intimidation** via le classement ou les points de compétence est **strictement interdit**.
+- **L'enseignant peut modifier, retirer ou ajuster des niveaux en cas de comportement inapproprié**.
+- **Aucun élève ne peut voir les statistiques individuelles des autres** sauf le classement général.
+
+### 🔹 Boutique des pouvoirs et rôles
+- Une fois un rôle ou pouvoir acheté, **il ne peut pas être revendu ou échangé**.
+- **Les pouvoirs ne doivent pas être utilisés pour désavantager les autres élèves**.
+
+### 🔹 Questions et suivi
+- Une section **"Questions?"** permet aux élèves de poser des questions privées à l’enseignant.
+- **Seul l’enseignant peut répondre aux questions**, les élèves ne peuvent pas voir celles des autres.
+- L’élève s’engage à **poser des questions en lien avec l’EPS et l’application** (pas de spam).
+
 
 ### Boutique des rôles et pouvoirs
 | Rôles                         | Points de compétence nécessaires | Compétences requises           | Explication                                               |
