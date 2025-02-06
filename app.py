@@ -206,6 +206,7 @@ if not st.session_state["accepted_rules"]:
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.title("📜 Règles du système")
     st.markdown("""
+### 🔹 Eléments généraux
 - **L'utilisation du site n'est en aucun cas obligatoire, l'expérience durant les cours d'éducation physique sportive et artistique restera la même si l'élève décide de ne pas l'utiliser.**
 - L’élève peut gagner **4 niveaux** par séance de 45 minutes.
   - 1 niveau pour le fair-play, le respect, l’investissement et l’atteinte des objectifs.
@@ -221,22 +222,19 @@ if not st.session_state["accepted_rules"]:
 
 ### 🔹 Attribution et gestion des niveaux
 - Un élève peut **proposer une auto-évaluation** de ses niveaux, mais la validation finale revient à l’enseignant.
-- **Le gain de niveaux dépend de critères précis** (fair-play, investissement, progrès…). **Aucun niveau n'est automatique.**
-- **L'élève ne peut pas dépasser un écart de 10 niveaux avec la moyenne de la classe** afin d’éviter un déséquilibre trop important.
+- **Le gain de niveaux dépend de critères précis** (fair-play, investissement,…). **Aucun niveau n'est automatique.**
 
 ### 🔹 Sécurité et fair-play
-- **Le harcèlement ou l'intimidation** via le classement ou les points de compétence est **strictement interdit**.
+- **Le harcèlement** via le classement ou les points de compétence est **strictement interdit**.
 - **L'enseignant peut modifier, retirer ou ajuster des niveaux en cas de comportement inapproprié**.
-- **Aucun élève ne peut voir les statistiques individuelles des autres** sauf le classement général.
+- **Aucun élève ne peut voir les statistiques individuelles des autres** mise à part le top ten. 
 
 ### 🔹 Boutique des pouvoirs et rôles
-- Une fois un rôle ou pouvoir acheté, **il ne peut pas être revendu ou échangé**.
-- **Les pouvoirs ne doivent pas être utilisés pour désavantager les autres élèves**.
+- **Les pouvoirs et rôles ne doivent pas être utilisés pour désavantager les autres élèves**.
 
-### 🔹 Questions et suivi
-- Une section **"Questions?"** permet aux élèves de poser des questions privées à l’enseignant.
-- **Seul l’enseignant peut répondre aux questions**, les élèves ne peuvent pas voir celles des autres.
-- L’élève s’engage à **poser des questions en lien avec l’EPS et l’application** (pas de spam).
+### 🔹 Questions 
+- L'élève contacte directement l'enseignant pour toutes questions en lien avec le site ou les cours de sport. 
+
 
 
 ### Boutique des rôles et pouvoirs
