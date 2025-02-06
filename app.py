@@ -209,12 +209,13 @@ if not st.session_state["accepted_rules"]:
 ### 🔹 Eléments généraux
 - **L'utilisation du site n'est en aucun cas obligatoire, l'expérience durant les cours d'éducation physique sportive et artistique restera la même si l'élève décide de ne pas l'utiliser.**
 - L’élève peut gagner **4 niveaux** par séance de 45 minutes.
-  - 1 niveau pour le fair-play, le respect, l’investissement et l’atteinte des objectifs.
+- 1 niveau pour le fair-play, le respect, l’investissement et l’atteinte des objectifs.
 - Tous les élèves commencent avec le rôle **d’Apprenti(e)**.
 - 1 niveau = **5 points de compétences**.
 - Chaque élève peut se spécialiser dans **3 compétences** uniquement.
 - L'élève peut acheter des pouvoirs ou des rôles avec ses niveaux et compétences.
 - **L'élève n'a pas le droit de se rajouter des niveaux ou points de compétence sous peine d'exclusion immédiate**.
+- L'utilisation du site peut prendre fin à tout moment si l'enseignant le juge nécessaire, mais au plus tard durant la fin de l'année scolaire. 
 
 ### 🔹 Accès et utilisation
 - **Le site est un outil pédagogique** et ne doit pas être utilisé pour nuire aux autres ou perturber le déroulement des séances.
