@@ -533,8 +533,6 @@ elif choice == "Leaderboard":
             f"**Rôle:** {row['Rôles']} | **Pouvoirs:** {row['Pouvoirs']} :trophy:",
             unsafe_allow_html=True
         )
-    st.subheader("Classement complet")
-    st.dataframe(leaderboard[["Nom", "Niveau", "Points de Compétence", "Rôles", "Pouvoirs"]])
     st.markdown('</div>', unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
