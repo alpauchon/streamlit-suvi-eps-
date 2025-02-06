@@ -262,7 +262,7 @@ if not st.session_state["accepted_rules"]:
 | 150           | Maître.sse du thème d’une prochaine séance.                                                        |
 | 300           | Roi / Reine de la séquence : permet de choisir le prochain thème pour 4 à 6 cours.                   |
     """)
-    if st.button("OK, j'ai compris les règles", key="accept_rules"):
+    if st.button("En cliquant sur ce bouton, je confirme avoir bien lu les règles et m'engage à les respecter scrupuleusement", key="accept_rules"):
         st.session_state["accepted_rules"] = True
     st.markdown('</div>', unsafe_allow_html=True)
     st.stop()
