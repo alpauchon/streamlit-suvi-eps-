@@ -216,7 +216,7 @@ if not st.session_state["accepted_rules"]:
 - **L'élève n'a pas le droit de se rajouter des niveaux ou points de compétence sous peine d'exclusion immédiate**. 
 
 ### Boutique des rôles et pouvoirs
-| Rôles                         | Points nécessaires | Compétences requises           | Explication                                               |
+| Rôles                         | Points de compétence nécessaires | Compétences requises           | Explication                                               |
 |-------------------------------|--------------------|--------------------------------|-----------------------------------------------------------|
 | Testeur.euse                  | 200                | FAVEDS                         | Peut essayer en premier les nouveaux exercices.         |
 | Démonstrateur.rice            | 150                | FAVEDS + Engagement            | Présente les mouvements au reste du groupe.             |
