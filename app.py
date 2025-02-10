@@ -1,7 +1,51 @@
 import streamlit as st
 import pandas as pd
-import json
+import sqlite3
 import os
+
+# -----------------------------------------------------------------------------
+# Initialisation de la base de données SQLite
+# -----------------------------------------------------------------------------
+DB_FILE = "suivi_eps.db"
+
+def init_db():
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    # Table des élèves
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS students (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            Nom TEXT,
+            Niveau INTEGER,
+            Points_de_Competence INTEGER,
+            Faveds INTEGER,
+            Strategie INTEGER,
+            Cooperation INTEGER,
+            Engagement INTEGER,
+            Roles TEXT,
+            Pouvoirs TEXT,
+            StudentCode TEXT
+        )
+    ''')
+    # Table du Hall of Fame
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS hall_of_fame (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            achievement TEXT
+        )
+    ''')
+    # Table pour la vidéo (optionnelle, non utilisée dans la logique d'upload)
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS video_link (
+            id INTEGER PRIMARY KEY,
+            video_url TEXT
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+init_db()
 
 # -----------------------------------------------------------------------------
 # Configuration de la page et injection de CSS pour un design moderne
@@ -68,73 +112,117 @@ h1, h2, h3 {
 </div>
 """, unsafe_allow_html=True)
 
-
 # -----------------------------------------------------------------------------
-# Suppression de la fonction de redémarrage automatique (non compatible)
+# Fonctions de gestion du Hall of Fame (sauvegarde dans SQLite)
 # -----------------------------------------------------------------------------
-
-# -----------------------------------------------------------------------------
-# Fonctions de gestion du Hall of Fame (sauvegarde en JSON)
-# -----------------------------------------------------------------------------
-HOF_FILE = "hall_of_fame.json"
-
 def load_hof():
-    if os.path.exists(HOF_FILE):
-        with open(HOF_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    else:
-        # Initialisation par défaut avec 3 entrées vides
+    conn = sqlite3.connect(DB_FILE)
+    df = pd.read_sql_query("SELECT name, achievement FROM hall_of_fame ORDER BY id ASC", conn)
+    conn.close()
+    if df.empty:
         return [{"name": "", "achievement": ""} for _ in range(3)]
+    else:
+        return df.to_dict(orient="records")
 
 def save_hof(hof_data):
-    with open(HOF_FILE, "w", encoding="utf-8") as f:
-        json.dump(hof_data, f, ensure_ascii=False, indent=4)
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute("DELETE FROM hall_of_fame")
+    for entry in hof_data:
+        c.execute("INSERT INTO hall_of_fame (name, achievement) VALUES (?, ?)", (entry["name"], entry["achievement"]))
+    conn.commit()
+    conn.close()
 
 # -----------------------------------------------------------------------------
-# Fonctions de gestion de la vidéo du dernier cours (sauvegarde en JSON)
+# (Optionnel) Fonctions de gestion de la vidéo via SQLite (non utilisées ici)
 # -----------------------------------------------------------------------------
-VIDEO_FILE = "video_link.json"
-
 def load_video_link():
-    if os.path.exists(VIDEO_FILE):
-        with open(VIDEO_FILE, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            return data.get("video_url", "")
-    else:
+    conn = sqlite3.connect(DB_FILE)
+    df = pd.read_sql_query("SELECT video_url FROM video_link WHERE id=1", conn)
+    conn.close()
+    if df.empty:
         return ""
+    else:
+        return df.iloc[0]["video_url"]
 
 def save_video_link(video_url):
-    with open(VIDEO_FILE, "w", encoding="utf-8") as f:
-        json.dump({"video_url": video_url}, f, ensure_ascii=False, indent=4)
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute("DELETE FROM video_link WHERE id=1")
+    c.execute("INSERT INTO video_link (id, video_url) VALUES (1, ?)", (video_url,))
+    conn.commit()
+    conn.close()
 
 # -----------------------------------------------------------------------------
-# Chargement des données des élèves
+# Fonctions de gestion des élèves (chargement et sauvegarde dans SQLite)
 # -----------------------------------------------------------------------------
 def load_data():
+    conn = sqlite3.connect(DB_FILE)
     try:
-        df = pd.read_csv("students_data.csv")
-        if df.empty:
-            raise FileNotFoundError
-        if "StudentCode" not in df.columns:
-            df["StudentCode"] = ""
-        else:
-            df["StudentCode"] = df["StudentCode"].fillna("")
-        df["Pouvoirs"] = df["Pouvoirs"].astype(str)
-        for col in ["Niveau", "Points de Compétence", "FAVEDS 🤸", "Stratégie 🧠", "Coopération 🤝", "Engagement 🌟"]:
-            df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0).astype(int)
-        print("[INFO] Données chargées avec succès.")
-        return df
-    except FileNotFoundError:
-        print("[WARNING] Fichier non trouvé, création d'un nouveau DataFrame.")
-        return pd.DataFrame({
-            "Nom": [], "Niveau": [], "Points de Compétence": [],
-            "FAVEDS 🤸": [], "Stratégie 🧠": [], "Coopération 🤝": [], "Engagement 🌟": [],
-            "Rôles": [], "Pouvoirs": [], "StudentCode": [],
+        df = pd.read_sql_query("SELECT * FROM students", conn)
+    except Exception as e:
+        st.error("Erreur lors du chargement de la base de données.")
+        df = pd.DataFrame()
+    conn.close()
+    if df.empty:
+        # Création d'un DataFrame vide avec les colonnes attendues
+        df = pd.DataFrame({
+            "Nom": [],
+            "Niveau": [],
+            "Points de Compétence": [],
+            "FAVEDS 🤸": [],
+            "Stratégie 🧠": [],
+            "Coopération 🤝": [],
+            "Engagement 🌟": [],
+            "Rôles": [],
+            "Pouvoirs": [],
+            "StudentCode": [],
         })
+    else:
+        # Renommage des colonnes de la BDD vers l'affichage souhaité
+        df = df.rename(columns={
+            "Faveds": "FAVEDS 🤸",
+            "Strategie": "Stratégie 🧠",
+            "Cooperation": "Coopération 🤝",
+            "Engagement": "Engagement 🌟",
+            "Points_de_Competence": "Points de Compétence"
+        })
+    return df
 
 def save_data(df):
-    df.to_csv("students_data.csv", index=False)
-    print("[INFO] Données sauvegardées.")
+    # On convertit les noms de colonnes pour correspondre à la base
+    df_to_save = df.rename(columns={
+        "FAVEDS 🤸": "Faveds",
+        "Stratégie 🧠": "Strategie",
+        "Coopération 🤝": "Cooperation",
+        "Engagement 🌟": "Engagement",
+        "Points de Compétence": "Points_de_Competence"
+    })
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    # Supprimer toutes les entrées existantes
+    c.execute("DELETE FROM students")
+    # Insertion de chaque ligne
+    for _, row in df_to_save.iterrows():
+        c.execute("""
+            INSERT INTO students 
+            (Nom, Niveau, Points_de_Competence, Faveds, Strategie, Cooperation, Engagement, Roles, Pouvoirs, StudentCode)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            row["Nom"],
+            int(row["Niveau"]),
+            int(row["Points_de_Competence"]),
+            int(row["Faveds"]),
+            int(row["Strategie"]),
+            int(row["Cooperation"]),
+            int(row["Engagement"]),
+            row["Roles"],
+            row["Pouvoirs"],
+            row["StudentCode"]
+        ))
+    conn.commit()
+    conn.close()
+    st.write("[INFO] Données sauvegardées.")
 
 if "students" not in st.session_state:
     st.session_state["students"] = load_data()
@@ -504,7 +592,6 @@ elif choice == "Hall of Fame":
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.markdown(images["Hall of Fame"], unsafe_allow_html=True)
     st.header("🏆 Hall of Fame")
-    # Recharger le Hall of Fame depuis le fichier
     hof_data = load_hof()
     st.session_state["hall_of_fame"] = hof_data
     if st.session_state["role"] == "teacher":
@@ -529,7 +616,6 @@ elif choice == "Hall of Fame":
     st.subheader("Les Exploits")
     for entry in st.session_state["hall_of_fame"]:
         if entry["name"]:
-            # Recherche dans la DataFrame pour obtenir l'URL de l'avatar
             student_info = st.session_state["students"].loc[st.session_state["students"]["Nom"] == entry["name"]]
             if not student_info.empty:
                 avatar_url = student_info.iloc[0].get("Avatar", "")
@@ -540,7 +626,6 @@ elif choice == "Hall of Fame":
             st.markdown("*Entrée vide*")
     st.markdown('</div>', unsafe_allow_html=True)
 
-
 # -----------------------------------------------------------------------------
 # Page Leaderboard (classement automatique par Points de Compétence)
 # -----------------------------------------------------------------------------
@@ -548,11 +633,10 @@ elif choice == "Leaderboard":
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.markdown(images["Leaderboard"], unsafe_allow_html=True)
     st.header("🏆 Leaderboard")
-    # Tri automatique des élèves par points décroissants
     leaderboard = st.session_state["students"].sort_values("Points de Compétence", ascending=False)
     st.subheader("Le top ten")
-    top3 = leaderboard.head(10)
-    for rank, (_, row) in enumerate(top3.iterrows(), start=1):
+    top10 = leaderboard.head(10)
+    for rank, (_, row) in enumerate(top10.iterrows(), start=1):
         st.markdown(
             f"**{rank}. {row['Nom']}** - Niveau: {row['Niveau']} - Points: {row['Points de Compétence']}<br>"
             f"**Rôle:** {row['Rôles']} | **Pouvoirs:** {row['Pouvoirs']} :trophy:",
@@ -577,7 +661,6 @@ elif choice == "Vidéo du dernier cours":
         col1, col2 = st.columns(2)
         with col1:
             if uploaded_file is not None:
-                # Sauvegarde du fichier uploadé sur le disque
                 with open(video_filename, "wb") as f:
                     f.write(uploaded_file.getbuffer())
                 st.success("Vidéo téléchargée avec succès!")
@@ -587,15 +670,12 @@ elif choice == "Vidéo du dernier cours":
                     os.remove(video_filename)
                     st.success("Vidéo retirée avec succès!")
     
-    # Affichage de la vidéo pour tous
     if os.path.exists(video_filename):
         st.video(video_filename)
     else:
         st.info("Aucune vidéo n'a encore été téléchargée pour le dernier cours.")
     
     st.markdown('</div>', unsafe_allow_html=True)
-
-
 
 # -----------------------------------------------------------------------------
 # Page de la fiche élève
