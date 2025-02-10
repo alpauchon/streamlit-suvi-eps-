@@ -1,171 +1,55 @@
 import streamlit as st
 import pandas as pd
-import sqlite3
+from pymongo import MongoClient
 import os
 
 # -----------------------------------------------------------------------------
-# Initialisation de la base de données SQLite
+# Connexion à MongoDB Atlas via st.secrets
 # -----------------------------------------------------------------------------
-DB_FILE = "suivi_eps.db"
-
-def init_db():
-    conn = sqlite3.connect(DB_FILE)
-    c = conn.cursor()
-    # Table des élèves
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS students (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            Nom TEXT,
-            Niveau INTEGER,
-            Points_de_Competence INTEGER,
-            Faveds INTEGER,
-            Strategie INTEGER,
-            Cooperation INTEGER,
-            Engagement INTEGER,
-            Roles TEXT,
-            Pouvoirs TEXT,
-            StudentCode TEXT
-        )
-    ''')
-    # Table du Hall of Fame
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS hall_of_fame (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT,
-            achievement TEXT
-        )
-    ''')
-    # Table pour la vidéo (optionnelle, non utilisée dans la logique d'upload)
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS video_link (
-            id INTEGER PRIMARY KEY,
-            video_url TEXT
-        )
-    ''')
-    conn.commit()
-    conn.close()
-
-init_db()
+MONGO_URI = st.secrets["MONGO_URI"]
+client = MongoClient(MONGO_URI)
+# Utilise la base par défaut indiquée dans l'URI ou précise le nom :
+db = client.get_default_database()  # ou par exemple: client["SuiviEPS"]
 
 # -----------------------------------------------------------------------------
-# Configuration de la page et injection de CSS pour un design moderne
-# -----------------------------------------------------------------------------
-st.set_page_config(page_title="Suivi EPS", page_icon="🏆", layout="wide")
-st.markdown("""
-<style>
-/* Fond global */
-body {
-    background-color: #f0f2f6;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-/* Style pour les cartes (sections) */
-.card {
-    background: #ffffff;
-    border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s;
-}
-.card:hover {
-    transform: scale(1.01);
-}
-
-/* Personnalisation des boutons */
-.stButton>button {
-    background-color: #2c3e50;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 5px;
-    font-size: 16px;
-    margin: 5px;
-    transition: background-color 0.3s;
-}
-.stButton>button:hover {
-    background-color: #34495e;
-}
-
-/* Couleur des titres */
-h1, h2, h3 {
-    color: #2c3e50;
-}
-
-/* Footer fixe */
-.footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background-color: #2c3e50;
-    color: white;
-    text-align: center;
-    padding: 5px;
-    font-size: 12px;
-    font-weight: bold;
-}
-</style>
-
-<div class="footer">
-    © 2025 - Créé par Al Pauchon
-</div>
-""", unsafe_allow_html=True)
-
-# -----------------------------------------------------------------------------
-# Fonctions de gestion du Hall of Fame (sauvegarde dans SQLite)
+# Fonctions de gestion du Hall of Fame (stocké dans MongoDB)
 # -----------------------------------------------------------------------------
 def load_hof():
-    conn = sqlite3.connect(DB_FILE)
-    df = pd.read_sql_query("SELECT name, achievement FROM hall_of_fame ORDER BY id ASC", conn)
-    conn.close()
-    if df.empty:
+    collection = db.hall_of_fame
+    data = list(collection.find({}, {"_id": 0}))
+    if not data:
         return [{"name": "", "achievement": ""} for _ in range(3)]
-    else:
-        return df.to_dict(orient="records")
+    return data
 
 def save_hof(hof_data):
-    conn = sqlite3.connect(DB_FILE)
-    c = conn.cursor()
-    c.execute("DELETE FROM hall_of_fame")
-    for entry in hof_data:
-        c.execute("INSERT INTO hall_of_fame (name, achievement) VALUES (?, ?)", (entry["name"], entry["achievement"]))
-    conn.commit()
-    conn.close()
+    collection = db.hall_of_fame
+    collection.delete_many({})
+    if hof_data:
+        collection.insert_many(hof_data)
 
 # -----------------------------------------------------------------------------
-# (Optionnel) Fonctions de gestion de la vidéo via SQLite (non utilisées ici)
+# Fonctions de gestion de la vidéo (stocké dans MongoDB)
 # -----------------------------------------------------------------------------
 def load_video_link():
-    conn = sqlite3.connect(DB_FILE)
-    df = pd.read_sql_query("SELECT video_url FROM video_link WHERE id=1", conn)
-    conn.close()
-    if df.empty:
+    collection = db.video_link
+    doc = collection.find_one({"id": 1}, {"_id": 0})
+    if not doc:
         return ""
-    else:
-        return df.iloc[0]["video_url"]
+    return doc.get("video_url", "")
 
 def save_video_link(video_url):
-    conn = sqlite3.connect(DB_FILE)
-    c = conn.cursor()
-    c.execute("DELETE FROM video_link WHERE id=1")
-    c.execute("INSERT INTO video_link (id, video_url) VALUES (1, ?)", (video_url,))
-    conn.commit()
-    conn.close()
+    collection = db.video_link
+    collection.delete_many({"id": 1})
+    collection.insert_one({"id": 1, "video_url": video_url})
 
 # -----------------------------------------------------------------------------
-# Fonctions de gestion des élèves (chargement et sauvegarde dans SQLite)
+# Fonctions de gestion des élèves (stocké dans MongoDB)
 # -----------------------------------------------------------------------------
 def load_data():
-    conn = sqlite3.connect(DB_FILE)
-    try:
-        df = pd.read_sql_query("SELECT * FROM students", conn)
-    except Exception as e:
-        st.error("Erreur lors du chargement de la base de données.")
-        df = pd.DataFrame()
-    conn.close()
-    if df.empty:
-        # Création d'un DataFrame vide avec les colonnes attendues
+    collection = db.students
+    data = list(collection.find({}, {"_id": 0}))
+    if not data:
+        # Crée un DataFrame vide avec les colonnes attendues
         df = pd.DataFrame({
             "Nom": [],
             "Niveau": [],
@@ -179,18 +63,19 @@ def load_data():
             "StudentCode": [],
         })
     else:
-        # Renommage des colonnes de la BDD vers l'affichage souhaité
+        df = pd.DataFrame(data)
+        # Renommer les colonnes pour l'affichage
         df = df.rename(columns={
+            "Points_de_Competence": "Points de Compétence",
             "Faveds": "FAVEDS 🤸",
             "Strategie": "Stratégie 🧠",
             "Cooperation": "Coopération 🤝",
             "Engagement": "Engagement 🌟",
-            "Points_de_Competence": "Points de Compétence"
         })
     return df
 
 def save_data(df):
-    # On convertit les noms de colonnes pour correspondre à la base
+    # Renomme les colonnes pour les versions normalisées dans MongoDB
     df_to_save = df.rename(columns={
         "FAVEDS 🤸": "Faveds",
         "Stratégie 🧠": "Strategie",
@@ -198,32 +83,16 @@ def save_data(df):
         "Engagement 🌟": "Engagement",
         "Points de Compétence": "Points_de_Competence"
     })
-    conn = sqlite3.connect(DB_FILE)
-    c = conn.cursor()
-    # Supprimer toutes les entrées existantes
-    c.execute("DELETE FROM students")
-    # Insertion de chaque ligne
-    for _, row in df_to_save.iterrows():
-        c.execute("""
-            INSERT INTO students 
-            (Nom, Niveau, Points_de_Competence, Faveds, Strategie, Cooperation, Engagement, Roles, Pouvoirs, StudentCode)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            row["Nom"],
-            int(row["Niveau"]),
-            int(row["Points_de_Competence"]),
-            int(row["Faveds"]),
-            int(row["Strategie"]),
-            int(row["Cooperation"]),
-            int(row["Engagement"]),
-            row["Roles"],
-            row["Pouvoirs"],
-            row["StudentCode"]
-        ))
-    conn.commit()
-    conn.close()
+    collection = db.students
+    collection.delete_many({})
+    records = df_to_save.to_dict(orient="records")
+    if records:
+        collection.insert_many(records)
     st.write("[INFO] Données sauvegardées.")
 
+# -----------------------------------------------------------------------------
+# Chargement initial des données
+# -----------------------------------------------------------------------------
 if "students" not in st.session_state:
     st.session_state["students"] = load_data()
 
@@ -303,7 +172,7 @@ if not st.session_state["accepted_rules"]:
 - Chaque élève peut se spécialiser dans **3 compétences** uniquement.
 - L'élève peut acheter des pouvoirs ou des rôles avec ses niveaux et compétences.
 - **L'élève n'a pas le droit de se rajouter des niveaux ou points de compétence sous peine d'exclusion immédiate**.
-- L'utilisation du site peut prendre fin à tout moment si l'enseignant le juge nécessaire, mais au plus tard durant la fin de l'année scolaire. 
+- L'utilisation du site peut prendre fin à tout moment si l'enseignant le juge nécessaire, mais au plus tard durant la fin de l'année scolaire.
 
 ### 🔹 Accès et utilisation
 - **Le site est un outil pédagogique** et ne doit pas être utilisé pour nuire aux autres ou perturber le déroulement des séances.
@@ -316,15 +185,13 @@ if not st.session_state["accepted_rules"]:
 ### 🔹 Sécurité et fair-play
 - **Le harcèlement** via le classement ou les points de compétence est **strictement interdit**.
 - **L'enseignant peut modifier, retirer ou ajuster des niveaux en cas de comportement inapproprié**.
-- **Aucun élève ne peut voir les statistiques individuelles des autres** mise à part le top ten. 
+- **Aucun élève ne peut voir les statistiques individuelles des autres** mise à part le top ten.
 
 ### 🔹 Boutique des pouvoirs et rôles
 - **Les pouvoirs et rôles ne doivent pas être utilisés pour désavantager les autres élèves**.
 
 ### 🔹 Questions 
-- L'élève contacte directement l'enseignant pour toutes questions en lien avec le site ou les cours de sport. 
-
-
+- L'élève contacte directement l'enseignant pour toutes questions en lien avec le site ou les cours de sport.
 
 ### Boutique des rôles et pouvoirs
 | Rôles                         | Points de compétence nécessaires | Compétences requises           | Explication                                               |
@@ -355,7 +222,6 @@ if not st.session_state["accepted_rules"]:
         st.session_state["accepted_rules"] = True
     st.markdown('</div>', unsafe_allow_html=True)
     st.stop()
-
 
 # -----------------------------------------------------------------------------
 # Leaderboard : classement automatique des élèves par Points de Compétence
