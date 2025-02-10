@@ -8,8 +8,8 @@ import os
 # -----------------------------------------------------------------------------
 MONGO_URI = st.secrets["MONGO_URI"]
 client = MongoClient(MONGO_URI)
-# Utilise la base par défaut indiquée dans l'URI ou précise le nom :
-db = client.get_default_database()  # ou par exemple: client["SuiviEPS"]
+# Accéder explicitement à la base de données "SuiviEPS"
+db = client["SuiviEPS"]
 
 # -----------------------------------------------------------------------------
 # Fonctions de gestion du Hall of Fame (stocké dans MongoDB)
