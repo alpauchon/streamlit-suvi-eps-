@@ -234,7 +234,7 @@ def get_leaderboard(df):
 # Définition des pages disponibles selon le rôle
 # -----------------------------------------------------------------------------
 if st.session_state["role"] == "teacher":
-    pages = ["Accueil", "Ajouter Élève", "Tableau de progression", "Attribution de niveaux", "Hall of Fame", "Leaderboard", "Vidéo du dernier cours", "Fiche Élève"]
+    pages = ["Accueil", "Ajouter Élève", "Tableau de progression", "Attribution de niveaux", "Hall of Fame", "Leaderboard", "Vidéo de M. Pauchon", "Fiche Élève"]
 else:
     pages = ["Accueil", "Tableau de progression", "Hall of Fame", "Leaderboard", "Vidéo de M. Pauchon", "Fiche Élève"]
 
@@ -300,11 +300,11 @@ images = {
       </text>
     </svg>
     """,
-    "Vidéo du dernier cours": """
+    "Vidéo de M. Pauchon": """
     <svg width="100%" height="150" xmlns="http://www.w3.org/2000/svg">
       <rect width="100%" height="150" fill="#9b59b6" />
       <text x="50%" y="50%" fill="#ffffff" font-size="36" text-anchor="middle" dy=".3em">
-        Vidéo du dernier cours
+        Vidéo de M. Pauchon
       </text>
     </svg>
     """
@@ -513,10 +513,10 @@ elif choice == "Leaderboard":
 # -----------------------------------------------------------------------------
 # Page Vidéo du dernier cours (accessible à tous, modifiable uniquement par l'enseignant)
 # -----------------------------------------------------------------------------
-elif choice == "Vidéo du dernier cours":
+elif choice == "Vidéo de M. Pauchon":
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.markdown(images["Vidéo du dernier cours"], unsafe_allow_html=True)
-    st.header("📹 Vidéo du dernier cours")
+    st.markdown(images["Vidéo de M. Pauchon"], unsafe_allow_html=True)
+    st.header("📹 Vidéo de M. Pauchon")
     
     video_filename = "uploaded_video.mp4"
     
