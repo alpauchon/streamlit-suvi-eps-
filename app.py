@@ -236,7 +236,7 @@ def get_leaderboard(df):
 if st.session_state["role"] == "teacher":
     pages = ["Accueil", "Ajouter Élève", "Tableau de progression", "Attribution de niveaux", "Hall of Fame", "Leaderboard", "Vidéo du dernier cours", "Fiche Élève"]
 else:
-    pages = ["Accueil", "Tableau de progression", "Hall of Fame", "Leaderboard", "Vidéo du dernier cours", "Fiche Élève"]
+    pages = ["Accueil", "Tableau de progression", "Hall of Fame", "Leaderboard", "Vidéo de M. Pauchon", "Fiche Élève"]
 
 choice = st.sidebar.radio("Navigation", pages)
 
