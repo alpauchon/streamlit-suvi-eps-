@@ -3,60 +3,60 @@ import pandas as pd
 from pymongo import MongoClient
 import os
 
-# ------------------ STYLE FUTURISTE ------------------ #
-st.set_page_config(page_title="Suivi EPS", layout="wide", page_icon=":rocket:")
+st.set_page_config(page_title="Suivi EPS", layout="wide", page_icon=":trophy:")
 
+# STYLES SIMPLES, ACCESSIBLES
 st.markdown("""
     <style>
-    html, body, [class*="st-"]  {
-        background: linear-gradient(120deg, #131a2e 0%, #0f2027 100%);
-        color: #eaf6fb !important;
-        font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+    body, html, [class*="st-"]  {
+        background: linear-gradient(115deg, #f2f8ff 0%, #ddeeff 100%) !important;
+        color: #20232a !important;
+        font-family: system-ui, "Roboto", Arial, sans-serif;
     }
-    .big-card {
-        background: rgba(34, 51, 85, 0.77);
-        border-radius: 2.2em;
-        box-shadow: 0 0 48px 0 rgba(33,200,243,0.08);
-        padding: 2.5em 3em 2.5em 3em;
-        margin: 2em 0 2.7em 0;
-        color: #f4faff;
-        backdrop-filter: blur(5px);
+    .card {
+        background: rgba(255,255,255,0.96);
+        border-radius: 1.4em;
+        box-shadow: 0 2px 20px 0 rgba(100,140,200,0.07);
+        padding: 2em 1.2em 2em 1.2em;
+        margin: 1em 0 2em 0;
     }
     .stButton>button, .stDownloadButton>button {
+        background: #2776e8 !important;
         color: #fff !important;
-        border-radius: 1em !important;
-        background: linear-gradient(90deg, #5f6cff 10%, #00e2d6 90%);
+        border-radius: 0.7em !important;
+        font-size: 1.1em;
+        padding: 0.6em 1.5em;
+        font-weight: 500;
         border: none !important;
-        font-size: 1.12em;
-        font-weight: 600;
-        padding: 0.7em 2em;
+        margin-bottom: 0.8em;
         margin-top: 0.5em;
-        margin-bottom: 0.7em;
-        box-shadow: 0 2px 16px 0 rgba(33,200,243,0.11);
-        transition: background 0.3s;
+        transition: background 0.2s;
     }
     .stButton>button:hover, .stDownloadButton>button:hover {
-        background: linear-gradient(90deg, #00e2d6 10%, #5f6cff 90%);
+        background: #1557a5 !important;
     }
-    .title-anim {
-        font-size: 3.2em;
-        font-weight: bold;
-        background: linear-gradient(92deg, #5f6cff 30%, #21e6c1 70%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        animation: blink-title 2.7s linear infinite alternate;
-        letter-spacing: 0.03em;
+    .stTabs [data-baseweb="tab-list"] button {
+        font-size: 1.05em;
+        color: #2776e8;
+    }
+    .stTabs [aria-selected="true"] {
+        background: #eaf1fc !important;
+        color: #1a345d !important;
+    }
+    .title {
+        font-size: 2.25em;
+        font-weight: 700;
+        color: #175bc7;
         margin-bottom: 0.2em;
     }
-    @keyframes blink-title {
-        from {filter: brightness(0.88);}
-        to   {filter: brightness(1.15);}
+    @media (max-width: 800px) {
+        .card { padding: 1.1em 0.6em 1.1em 0.6em; }
+        .title { font-size: 1.4em; }
     }
-    .svg-anim {width:100%;margin-top:2em;margin-bottom:-1.7em;}
     </style>
 """, unsafe_allow_html=True)
 
-# ------------------ CONNEXION MONGODB ------------------ #
+# Connexion à MongoDB
 MONGO_URI = st.secrets["MONGO_URI"]
 client = MongoClient(MONGO_URI)
 db = client["SuiviEPS"]
@@ -99,7 +99,6 @@ def save_data(df):
     if records:
         collection.insert_many(records)
 
-# ------------------ INITIALISATION SESSION ------------------ #
 if "students" not in st.session_state:
     st.session_state["students"] = load_data()
 if "role" not in st.session_state:
@@ -109,39 +108,31 @@ if "user" not in st.session_state:
 if "accepted_rules" not in st.session_state:
     st.session_state["accepted_rules"] = False
 
-# ------------------ PAGE D'ACCÈS ------------------ #
+# PAGE D'ACCÈS
 if st.session_state["role"] is None:
-    st.markdown('<div class="big-card">', unsafe_allow_html=True)
-    st.markdown('<div class="title-anim">Suivi EPS Futuriste</div>', unsafe_allow_html=True)
-    st.markdown("""
-    <svg class="svg-anim" height="90" width="100%">
-        <circle cx="50" cy="45" r="38" fill="none" stroke="#00e2d6" stroke-width="4" stroke-dasharray="16 10"/>
-        <circle cx="190" cy="45" r="38" fill="none" stroke="#5f6cff" stroke-width="4" stroke-dasharray="12 8"/>
-        <rect x="95" y="18" rx="19" width="60" height="54" fill="#272e4c" stroke="#5f6cff" stroke-width="3"/>
-        <text x="123" y="60" font-size="38" fill="#21e6c1" font-family="Segoe UI" font-weight="bold">EPS</text>
-    </svg>
-    """, unsafe_allow_html=True)
-    access_mode = st.radio("Connexion", options=["Enseignant", "Élève"], horizontal=True)
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.markdown('<div class="title">Bienvenue sur Suivi EPS</div>', unsafe_allow_html=True)
+    access_mode = st.radio("Qui êtes-vous ?", options=["Enseignant", "Élève"], horizontal=True)
     if access_mode == "Enseignant":
         teacher_password = st.text_input("Code enseignant", type="password")
         if st.button("Connexion"):
             if teacher_password == st.secrets["ACCESS_CODE"]:
                 st.session_state["role"] = "teacher"
                 st.session_state["user"] = "Enseignant"
-                st.success("Bienvenue, Professeur !")
+                st.success("Bienvenue !")
             else:
                 st.error("Code incorrect.")
     else:
         if st.session_state["students"].empty:
-            st.warning("Aucun élève enregistré.")
+            st.warning("Aucun élève n'est encore enregistré.")
         else:
-            student_name = st.selectbox("Ton nom", st.session_state["students"]["Nom"])
+            student_name = st.selectbox("Choisis ton nom", st.session_state["students"]["Nom"])
             student_row = st.session_state["students"].loc[st.session_state["students"]["Nom"] == student_name].iloc[0]
             if student_row["StudentCode"] == "":
-                st.info("Crée ton code d'accès secret.")
+                st.info("Première connexion : crée ton code secret.")
                 new_code = st.text_input("Nouveau code (min 4 caractères)", type="password")
                 new_code_confirm = st.text_input("Confirme ton code", type="password")
-                if st.button("Créer mon code & me connecter"):
+                if st.button("Créer le code et me connecter"):
                     if new_code != new_code_confirm:
                         st.error("Codes différents !")
                     elif len(new_code) < 4:
@@ -165,53 +156,53 @@ if st.session_state["role"] is None:
     st.markdown('</div>', unsafe_allow_html=True)
     st.stop()
 
-# ------------------ REGLES ------------------ #
+# RÈGLES
 if not st.session_state["accepted_rules"]:
-    st.markdown('<div class="big-card">', unsafe_allow_html=True)
-    st.markdown('<div class="title-anim">📜 Règles du système</div>', unsafe_allow_html=True)
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.markdown('<div class="title">📜 Règles du système</div>', unsafe_allow_html=True)
     st.markdown("""
-- **Utilisation facultative :** tu restes libre d'utiliser ou non.
-- **4 niveaux max / séance** (1 niveau = 5 points).
-- **Départ** : tout le monde est Apprenti(e).
-- **Boutique :** rôles & pouvoirs = avec tes niveaux ou points.
-- **Pas d'ajout manuel non validé par l’enseignant.**
+- **Utilisation du site non obligatoire**
+- Maximum **4 niveaux** par séance (1 niveau = 5 points).
+- Début = rôle **Apprenti(e)**.
+- Tu peux acheter des rôles ou pouvoirs avec tes niveaux ou points.
+- **Aucun ajout manuel** non validé par l’enseignant.
     """)
-    if st.button("Je confirme avoir lu les règles et m'engage à les respecter"):
+    if st.button("J'ai lu et j'accepte les règles"):
         st.session_state["accepted_rules"] = True
         st.balloons()
     st.markdown('</div>', unsafe_allow_html=True)
     st.stop()
 
-# ------------------ NAVIGATION ------------------ #
+# NAVIGATION
 if st.session_state["role"] == "teacher":
     pages = ["Accueil", "Ajouter Élève", "Tableau de progression", "Attribution de niveaux", "Hall of Fame", "Leaderboard", "Vidéo", "Fiche Élève"]
 else:
     pages = ["Accueil", "Tableau de progression", "Hall of Fame", "Leaderboard", "Vidéo", "Fiche Élève"]
-choice = st.sidebar.radio("Navigation", pages, label_visibility="collapsed")
+choice = st.sidebar.radio("Navigation", pages)
 
-# ------------------ PAGE ACCUEIL ------------------ #
+# ACCUEIL
 if choice == "Accueil":
-    st.markdown('<div class="big-card">', unsafe_allow_html=True)
-    st.markdown('<div class="title-anim">Bienvenue sur Suivi EPS</div>', unsafe_allow_html=True)
-    st.write("Utilise le menu à gauche pour naviguer entre les sections et accéder à ta fiche ou la boutique !")
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.markdown('<div class="title">Bienvenue !</div>', unsafe_allow_html=True)
+    st.write("Utilise le menu à gauche pour accéder à toutes les sections.")
     st.markdown(f"**Mode d'accès :** {st.session_state['role'].capitalize()} ({st.session_state['user']})")
     if st.session_state["role"] == "teacher":
-        st.download_button("⬇️ Télécharger le fichier CSV", data=st.session_state["students"].to_csv(index=False), file_name="students_data.csv", mime="text/csv")
+        st.download_button("Télécharger le CSV des élèves", data=st.session_state["students"].to_csv(index=False), file_name="students_data.csv", mime="text/csv")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# ------------------ AJOUTER ELEVE ------------------ #
+# AJOUTER ÉLÈVE
 elif choice == "Ajouter Élève":
     if st.session_state["role"] != "teacher":
         st.error("Accès réservé aux enseignants.")
     else:
-        st.markdown('<div class="big-card">', unsafe_allow_html=True)
-        st.header("➕ Ajout des participant.e.s")
+        st.markdown('<div class="card">', unsafe_allow_html=True)
+        st.header("Ajouter un élève")
         with st.form("ajouter_eleve_form"):
             nom = st.text_input("Nom")
             niveau = st.number_input("Niveau de départ", min_value=0, max_value=10000, step=1)
             points_comp = niveau * 5
-            st.write(f"**Points de Compétence disponibles :** {points_comp}")
-            submit_eleve = st.form_submit_button("Ajouter l'élève")
+            st.write(f"Points de Compétence : {points_comp}")
+            submit_eleve = st.form_submit_button("Ajouter")
         if submit_eleve and nom:
             new_data = pd.DataFrame({
                 "Nom": [nom],
@@ -225,16 +216,16 @@ elif choice == "Ajouter Élève":
             for col in ["Niveau", "Points de Compétence"]:
                 st.session_state["students"][col] = pd.to_numeric(st.session_state["students"][col], errors="coerce").fillna(0).astype(int)
             save_data(st.session_state["students"])
-            st.success(f"✅ {nom} ajouté avec niveau {niveau}.")
+            st.success(f"{nom} ajouté avec {niveau} niveaux.")
         st.markdown('</div>', unsafe_allow_html=True)
 
-# ------------------ TABLEAU DE PROGRESSION ------------------ #
+# TABLEAU DE PROGRESSION
 elif choice == "Tableau de progression":
-    st.markdown('<div class="big-card">', unsafe_allow_html=True)
-    st.header("📊 Tableau de progression")
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.header("Tableau de progression")
     if st.session_state["role"] == "teacher":
         df = st.data_editor(st.session_state["students"], use_container_width=True)
-        if st.button("Enregistrer modifications"):
+        if st.button("Enregistrer"):
             st.session_state["students"] = df
             save_data(df)
     else:
@@ -243,52 +234,50 @@ elif choice == "Tableau de progression":
         st.data_editor(df, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
-# ------------------ ATTRIBUTION DE NIVEAUX ------------------ #
+# ATTRIBUTION DE NIVEAUX
 elif choice == "Attribution de niveaux":
     if st.session_state["role"] != "teacher":
         st.error("Accès réservé aux enseignants.")
     else:
-        st.markdown('<div class="big-card">', unsafe_allow_html=True)
-        st.header("🏷️ Attribution de niveaux")
+        st.markdown('<div class="card">', unsafe_allow_html=True)
+        st.header("Attribuer des niveaux")
         with st.form("assign_form"):
-            selected = st.multiselect("Sélectionnez élèves", st.session_state["students"]["Nom"].tolist())
+            selected = st.multiselect("Sélectionner les élèves", st.session_state["students"]["Nom"].tolist())
             levels = st.number_input("Niveaux à ajouter", min_value=1, step=1)
-            submit = st.form_submit_button("Ajouter")
+            submit = st.form_submit_button("Attribuer")
         if submit:
             for nom in selected:
                 idx = st.session_state["students"].index[st.session_state["students"]["Nom"] == nom][0]
                 st.session_state["students"].at[idx, "Niveau"] += levels
                 st.session_state["students"].at[idx, "Points de Compétence"] += levels * 5
             save_data(st.session_state["students"])
-            st.success("Attributions appliquées.")
+            st.success("Attributions effectuées.")
         st.markdown('</div>', unsafe_allow_html=True)
 
-# ------------------ HALL OF FAME ------------------ #
+# HALL OF FAME
 elif choice == "Hall of Fame":
-    st.markdown('<div class="big-card">', unsafe_allow_html=True)
-    st.header("🏆 Hall of Fame")
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.header("Hall of Fame")
     hof_data = load_hof()
     st.session_state["hall_of_fame"] = hof_data
     if st.session_state["role"] == "teacher":
-        st.subheader("Modifier le Hall of Fame")
-        nb_entries = st.number_input("Nombre d'élèves à mettre en lumière", min_value=1, max_value=5, 
-                                     value=len(st.session_state["hall_of_fame"]) if st.session_state["hall_of_fame"] else 3, 
-                                     step=1)
-        with st.form("hall_of_fame_form"):
+        st.subheader("Mettre en lumière")
+        nb_entries = st.number_input("Nombre d'élèves", min_value=1, max_value=5, value=len(st.session_state["hall_of_fame"]) if st.session_state["hall_of_fame"] else 3, step=1)
+        with st.form("hof_form"):
             new_entries = []
             for i in range(nb_entries):
-                st.write(f"### Élève {i+1}")
+                st.write(f"Élève {i+1}")
                 options = st.session_state["students"]["Nom"].tolist()
                 default_name = st.session_state["hall_of_fame"][i]["name"] if i < len(st.session_state["hall_of_fame"]) else ""
                 name = st.selectbox(f"Nom de l'élève {i+1}", options=options, index=options.index(default_name) if default_name in options else 0, key=f"hof_name_{i}")
                 default_achievement = st.session_state["hall_of_fame"][i]["achievement"] if i < len(st.session_state["hall_of_fame"]) else ""
                 achievement = st.text_area(f"Exploits de {name}", value=default_achievement, key=f"hof_achievement_{i}")
                 new_entries.append({"name": name, "achievement": achievement})
-            if st.form_submit_button("Enregistrer le Hall of Fame"):
+            if st.form_submit_button("Enregistrer"):
                 st.session_state["hall_of_fame"] = new_entries
                 save_hof(new_entries)
                 st.success("Hall of Fame mis à jour.")
-    st.subheader("Les Exploits")
+    st.subheader("Les exploits")
     for entry in st.session_state["hall_of_fame"]:
         if entry["name"]:
             st.markdown(f"**{entry['name']}** : {entry['achievement']}")
@@ -296,25 +285,25 @@ elif choice == "Hall of Fame":
             st.markdown("*Entrée vide*")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# ------------------ LEADERBOARD ------------------ #
+# LEADERBOARD
 elif choice == "Leaderboard":
-    st.markdown('<div class="big-card">', unsafe_allow_html=True)
-    st.header("🏆 Leaderboard")
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.header("Leaderboard")
     leaderboard = st.session_state["students"].sort_values("Points de Compétence", ascending=False)
-    st.subheader("Le top ten")
+    st.subheader("Top 10")
     top10 = leaderboard.head(10)
     for rank, (_, row) in enumerate(top10.iterrows(), start=1):
         st.markdown(
-            f"**{rank}. {row['Nom']}** - Niveau: {row['Niveau']} - Points: {row['Points de Compétence']}<br>"
-            f"**Rôle:** {row['Rôles']} | **Pouvoirs:** {row['Pouvoirs']} :trophy:",
+            f"**{rank}. {row['Nom']}** – Niveau : {row['Niveau']} – Points : {row['Points de Compétence']}<br>"
+            f"Rôle : {row['Rôles']} | Pouvoirs : {row['Pouvoirs']}",
             unsafe_allow_html=True
         )
     st.markdown('</div>', unsafe_allow_html=True)
 
-# ------------------ VIDEO ------------------ #
+# VIDÉO
 elif choice == "Vidéo":
-    st.markdown('<div class="big-card">', unsafe_allow_html=True)
-    st.header("📹 Vidéo")
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.header("Vidéo du dernier cours")
     video_filename = "uploaded_video.mp4"
     if st.session_state["role"] == "teacher":
         st.subheader("Gérer la vidéo")
@@ -324,36 +313,36 @@ elif choice == "Vidéo":
             if uploaded_file is not None:
                 with open(video_filename, "wb") as f:
                     f.write(uploaded_file.getbuffer())
-                st.success("Vidéo téléchargée avec succès!")
+                st.success("Vidéo téléchargée !")
         with col2:
             if os.path.exists(video_filename):
                 if st.button("Retirer la vidéo"):
                     os.remove(video_filename)
-                    st.success("Vidéo retirée avec succès!")
+                    st.success("Vidéo retirée.")
     if os.path.exists(video_filename):
         st.video(video_filename)
     else:
-        st.info("Aucune vidéo n'a encore été téléchargée.")
+        st.info("Aucune vidéo ajoutée pour l'instant.")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# ------------------ FICHE ELEVE & BOUTIQUE ------------------ #
+# FICHE ELEVE & BOUTIQUE
 elif choice == "Fiche Élève":
-    st.markdown('<div class="big-card">', unsafe_allow_html=True)
-    st.header("🔍 Fiche et Boutique")
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.header("Ma fiche & Boutique")
     if st.session_state["role"] == "teacher":
         selected_student = st.selectbox("Choisir un élève", st.session_state["students"]["Nom"])
     else:
         selected_student = st.session_state["user"]
-        st.info(f"Connecté comme <b>{selected_student}</b>", unsafe_allow_html=True)
+        st.info(f"Connecté(e) comme {selected_student}")
     if selected_student:
         student_data = st.session_state["students"].loc[st.session_state["students"]["Nom"] == selected_student].iloc[0]
-        st.markdown(f"""<div style='padding:1.2em 2em;background:rgba(30,34,54,0.78);border-radius:1.4em;margin-bottom:1em'>
+        st.markdown(f"""<div style='background:#f7fafd;border-radius:1em;padding:1em 1.2em;margin-bottom:1.2em'>
             <b>Niveau :</b> {student_data['Niveau']}<br>
             <b>Points de Compétence :</b> {student_data['Points de Compétence']}
         </div>""", unsafe_allow_html=True)
-        if st.button("🥳 Fêter ma progression !"):
+        if st.button("Fêter ma progression"):
             st.balloons()
-        onglets = st.tabs(["🛒 Boutique des Pouvoirs", "🏅 Boutique des Rôles"])
+        onglets = st.tabs(["Boutique des Pouvoirs", "Boutique des Rôles"])
         with onglets[0]:
             store_items = {
                 "Le malin / la maligne": 40,
@@ -362,9 +351,9 @@ elif choice == "Fiche Élève":
                 "Maître du thème d’une séance": 150,
                 "Roi / Reine de la séquence": 300
             }
-            selected_item = st.selectbox("🛍️ Choisir un pouvoir", list(store_items.keys()), key="pouvoirs")
+            selected_item = st.selectbox("Choisir un pouvoir", list(store_items.keys()), key="pouvoirs")
             cost = store_items[selected_item]
-            st.info(f"💰 Coût: {cost} niveaux")
+            st.info(f"Coût : {cost} niveaux")
             if st.button("Acheter ce pouvoir", key="acheter_pouvoir"):
                 if int(student_data["Niveau"]) >= cost:
                     current_level = int(student_data["Niveau"])
@@ -374,10 +363,9 @@ elif choice == "Fiche Élève":
                     nouveaux_pouvoirs = anciens_pouvoirs + ", " + selected_item if anciens_pouvoirs else selected_item
                     st.session_state["students"].loc[st.session_state["students"]["Nom"] == selected_student, "Pouvoirs"] = nouveaux_pouvoirs
                     save_data(st.session_state["students"])
-                    st.success(f"🎁 Pouvoir '{selected_item}' acquis !")
-                    st.snow()
+                    st.success(f"Pouvoir '{selected_item}' acquis !")
                 else:
-                    st.error("Pas assez de niveaux !")
+                    st.error("Pas assez de niveaux.")
         with onglets[1]:
             roles_store = {
                 "Testeur.euse": 200,
@@ -393,9 +381,9 @@ elif choice == "Fiche Élève":
                 "Autonome": 200,
                 "Responsable de séance": 350
             }
-            selected_role = st.selectbox("🎭 Choisir un rôle", list(roles_store.keys()), key="roles")
+            selected_role = st.selectbox("Choisir un rôle", list(roles_store.keys()), key="roles")
             role_cost = roles_store[selected_role]
-            st.info(f"💰 Coût: {role_cost} points de compétence")
+            st.info(f"Coût : {role_cost} points de compétence")
             if st.button("Acquérir ce rôle", key="acheter_role"):
                 if int(student_data["Points de Compétence"]) >= role_cost:
                     current_points = int(student_data["Points de Compétence"])
@@ -405,8 +393,7 @@ elif choice == "Fiche Élève":
                     nouveaux_roles = anciens_roles + ", " + selected_role if anciens_roles else selected_role
                     st.session_state["students"].loc[st.session_state["students"]["Nom"] == selected_student, "Rôles"] = nouveaux_roles
                     save_data(st.session_state["students"])
-                    st.success(f"🏅 Rôle '{selected_role}' acquis !")
-                    st.snow()
+                    st.success(f"Rôle '{selected_role}' acquis !")
                 else:
-                    st.error("Pas assez de points !")
+                    st.error("Pas assez de points.")
     st.markdown('</div>', unsafe_allow_html=True)
