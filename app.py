@@ -137,7 +137,7 @@ if not st.session_state["accepted_rules"]:
 - **Les pouvoirs et rôles ne doivent pas être utilisés pour désavantager les autres élèves**.
 
 ### 🔹 Questions 
-- L'élève contacte directement l'enseignant pour toutes questions en lien avec le site ou les cours de sport.
+- L'élève contacte directement l'enseignant pour toutes questions en lien avec le site ou les cours d'éducation physique et sportive.
 
 ### Boutique des rôles et pouvoirs
 
