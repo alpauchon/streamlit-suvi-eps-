@@ -109,16 +109,66 @@ if st.session_state["role"] is None:
 if not st.session_state["accepted_rules"]:
     st.title("📜 Règles du système")
     st.markdown("""
-- **L'utilisation du site n'est pas obligatoire, l'expérience en EPS reste la même sans.**
+### 🔹 Eléments généraux
+- **L'utilisation du site n'est en aucun cas obligatoire, l'expérience durant les cours d'éducation physique sportive et artistique restera la même si l'élève décide de ne pas l'utiliser.**
 - L’élève peut gagner **4 niveaux** par séance de 45 minutes.
-- 1 niveau = **5 points de compétences**.
+- 1 niveau pour le fair-play, le respect, l’investissement et l’atteinte des objectifs.
 - Tous les élèves commencent avec le rôle **d’Apprenti(e)**.
-- L'élève peut acheter des pouvoirs ou des rôles avec ses niveaux/points.
-- **Aucun ajout manuel de points non validé**.
+- 1 niveau = **5 points de compétences**.
+- Chaque élève peut se spécialiser dans **3 compétences** uniquement.
+- L'élève peut acheter des pouvoirs ou des rôles avec ses niveaux et compétences.
+- **L'élève n'a pas le droit de se rajouter des niveaux ou points de compétence sous peine d'exclusion immédiate**.
+- L'utilisation du site peut prendre fin à tout moment si l'enseignant le juge nécessaire, mais au plus tard durant la fin de l'année scolaire.
+
+### 🔹 Accès et utilisation
+- **Le site est un outil pédagogique** et ne doit pas être utilisé pour nuire aux autres ou perturber le déroulement des séances.
+- **L’accès à son compte est personnel** et ne doit pas être partagé avec d’autres élèves.
+
+### 🔹 Attribution et gestion des niveaux
+- Un élève peut **proposer une auto-évaluation** de ses niveaux, mais la validation finale revient à l’enseignant.
+- **Le gain de niveaux dépend de critères précis** (fair-play, investissement,…). **Aucun niveau n'est automatique.**
+
+### 🔹 Sécurité et fair-play
+- **Le harcèlement** via le classement ou les points de compétence est **strictement interdit**.
+- **L'enseignant peut modifier, retirer ou ajuster des niveaux en cas de comportement inapproprié**.
+- **Aucun élève ne peut voir les statistiques individuelles des autres** mise à part le top ten.
+
+### 🔹 Boutique des pouvoirs et rôles
+- **Les pouvoirs et rôles ne doivent pas être utilisés pour désavantager les autres élèves**.
+
+### 🔹 Questions 
+- L'élève contacte directement l'enseignant pour toutes questions en lien avec le site ou les cours de sport.
+
+### Boutique des rôles et pouvoirs
+| Rôles                         | Points de compétence nécessaires | Compétences requises           | Explication                                               |
+|-------------------------------|--------------------|--------------------------------|-----------------------------------------------------------|
+| Testeur.euse                  | 200                | FAVEDS                         | Peut essayer en premier les nouveaux exercices.         |
+| Démonstrateur.rice            | 150                | FAVEDS + Engagement            | Présente les mouvements au reste du groupe.             |
+| Facilitateur.rice             | 150                | Coopération + Engagement       | Moins de répétitions imposées s’il maîtrise déjà l’exercice.|
+| Créateur.rice de règles       | 250                | Stratégie                      | Peut modifier certaines règles des exercices.           |
+| Meneur.euse tactique          | 250                | Stratégie + Coopération        | Oriente une équipe et propose des stratégies.           |
+| Arbitre / Régulateur.rice     | 300                | Stratégie + Engagement         | Aide à gérer les litiges et décisions collectives.        |
+| Aide-coach                    | 250                | Coopération + Engagement       | Peut accompagner un élève en difficulté.                |
+| Coordinateur.rice de groupe   | 300                | Coopération                    | Premier choix des groupes.                                |
+| Facilitateur.rice (social)     | 250                | Coopération + Engagement       | Favorise l’intégration de tous.                           |
+| Réducteur.rice des contraintes| 200                | FAVEDS + Engagement            | Accès à des versions simplifiées des consignes.           |
+| Autonome                      | 200                | Stratégie + Engagement         | Peut choisir son propre parcours ou défi.               |
+| Responsable de séance         | 350                | Stratégie + Coopération + Engagement | Peut diriger une partie de la séance.              |
+
+### Boutique secrète
+| Coût en niveau | Pouvoirs à choix                                                                                   |
+|---------------|----------------------------------------------------------------------------------------------------|
+| 40            | Le malin / la maligne : doubler ses niveaux gagnés à chaque cours.                                 |
+| 50            | Choix d’un jeu (5 min) ou donner 20 niveaux à quelqu’un.                                            |
+| 100           | Maître.sse des groupes pour une séance de 1h30 ou doubler ses points de compétences.                 |
+| 150           | Maître.sse du thème d’une prochaine séance.                                                        |
+| 300           | Roi / Reine de la séquence : permet de choisir le prochain thème pour 4 à 6 cours.                   |
     """)
     if st.button("Je confirme avoir lu les règles et m'engager à les respecter", key="accept_rules"):
         st.session_state["accepted_rules"] = True
     st.stop()
+
+
 
 # Pages disponibles
 if st.session_state["role"] == "teacher":
