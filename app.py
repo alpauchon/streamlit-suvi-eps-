@@ -139,7 +139,6 @@ if not st.session_state["accepted_rules"]:
 ### 🔹 Questions 
 - L'élève contacte directement l'enseignant pour toutes questions en lien avec le site ou les cours de sport.
 
-st.markdown("""
 ### Boutique des rôles et pouvoirs
 
 | Rôle                          | Points de compétence nécessaires | Explication                                                    |
@@ -156,7 +155,7 @@ st.markdown("""
 | Réducteur.rice des contraintes| 200                | Accès à des versions simplifiées des consignes.                |
 | Autonome                      | 200                | Peut choisir son propre parcours ou défi.                      |
 | Responsable de séance         | 350                | Peut diriger une partie de la séance.                          |
-""")
+
 
 ### Boutique secrète
 | Coût en niveau | Pouvoirs à choix                                                                                   |
