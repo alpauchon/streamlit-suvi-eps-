@@ -3,66 +3,6 @@ import pandas as pd
 from pymongo import MongoClient
 import os
 
-# --- STYLE HEP Vaud ---
-st.markdown("""
-<style>
-html, body, [class*="st-"] {
-    background: #f8fafc !important; /* très doux */
-    color: #172a3a;
-    font-family: 'Inter', 'Segoe UI', 'Arial', sans-serif;
-}
-.stApp {
-    background: #f8fafc;
-}
-h1, h2, h3, h4, .stHeader, .st-bb {
-    color: #224488 !important; /* Bleu HEP */
-    font-weight: 700;
-    letter-spacing: -1px;
-}
-.stButton>button, .stDownloadButton>button {
-    background: linear-gradient(90deg, #285ea8, #3973d3);
-    color: white;
-    border-radius: 8px;
-    border: none;
-    font-size: 1.08em;
-    font-weight: 600;
-    margin-bottom: 0.7em;
-    margin-top: 0.4em;
-    box-shadow: 0 1px 8px 0 rgba(41,72,180,0.07);
-}
-.stButton>button:hover, .stDownloadButton>button:hover {
-    background: #224488;
-    color: #fff;
-}
-.stTabs [data-baseweb="tab-list"] button {
-    font-size: 1.03em;
-    color: #285ea8;
-    background: #f1f5fa;
-    border-radius: 7px 7px 0 0;
-}
-.stTabs [aria-selected="true"] {
-    background: #e2ebf8 !important;
-    color: #224488 !important;
-    border-bottom: 2px solid #224488 !important;
-}
-.st-cz, .st-cy, .stDataFrame, .st-dx {
-    background: #fff !important;
-    border-radius: 18px !important;
-    box-shadow: 0 2px 12px 0 rgba(30,60,100,0.05) !important;
-}
-.stSidebar, .css-6qob1r, .css-1d391kg {
-    background: #eaf1f8 !important;
-    border-radius: 0 20px 20px 0 !important;
-}
-@media (max-width: 700px) {
-    .stTabs [data-baseweb="tab-list"] button { font-size: 0.97em; }
-    h1, h2, h3 { font-size: 1.17em; }
-    .st-cz, .st-cy, .stDataFrame, .st-dx { padding: 0.7em !important; }
-}
-</style>
-""", unsafe_allow_html=True)
-
-
 # Connexion à MongoDB Atlas via st.secrets
 MONGO_URI = st.secrets["MONGO_URI"]
 client = MongoClient(MONGO_URI)
