@@ -54,6 +54,10 @@ def load_data():
             "Nom": [],
             "Niveau": [],
             "Points de Compétence": [],
+            "FAVEDS 🤸": [],
+            "Stratégie 🧠": [],
+            "Coopération 🤝": [],
+            "Engagement 🌟": [],
             "Rôles": [],
             "Pouvoirs": [],
             "StudentCode": [],
@@ -63,12 +67,20 @@ def load_data():
         # Renommer les colonnes pour l'affichage
         df = df.rename(columns={
             "Points_de_Competence": "Points de Compétence",
+            "Faveds": "FAVEDS 🤸",
+            "Strategie": "Stratégie 🧠",
+            "Cooperation": "Coopération 🤝",
+            "Engagement": "Engagement 🌟",
         })
     return df
 
 def save_data(df):
     # Renomme les colonnes pour les versions normalisées dans MongoDB
     df_to_save = df.rename(columns={
+        "FAVEDS 🤸": "Faveds",
+        "Stratégie 🧠": "Strategie",
+        "Coopération 🤝": "Cooperation",
+        "Engagement 🌟": "Engagement",
         "Points de Compétence": "Points_de_Competence"
     })
     collection = db.students
@@ -330,18 +342,29 @@ elif choice == "Ajouter Élève":
             st.write(f"**Points de Compétence disponibles :** {points_comp}")
             st.markdown("### Allocation des points entre les compétences")
             remaining_points = points_comp
+            faveds = st.number_input("FAVEDS 🤸", min_value=0, max_value=remaining_points, step=1, value=0)
+            remaining_points -= faveds
+            strategie = st.number_input("Stratégie 🧠", min_value=0, max_value=remaining_points, step=1, value=0)
+            remaining_points -= strategie
+            cooperation = st.number_input("Coopération 🤝", min_value=0, max_value=remaining_points, step=1, value=0)
+            remaining_points -= cooperation
+            engagement = st.number_input("Engagement 🌟", min_value=0, max_value=remaining_points, step=1, value=remaining_points)
             submit_eleve = st.form_submit_button("Ajouter l'élève")
         if submit_eleve and nom:
             new_data = pd.DataFrame({
                 "Nom": [nom],
                 "Niveau": [niveau],
                 "Points de Compétence": [points_comp],
+                "FAVEDS 🤸": [faveds],
+                "Stratégie 🧠": [strategie],
+                "Coopération 🤝": [cooperation],
+                "Engagement 🌟": [engagement],
                 "Rôles": ["Apprenti(e)"],
                 "Pouvoirs": [""],
                 "StudentCode": [""],
             })
             st.session_state["students"] = pd.concat([st.session_state["students"], new_data], ignore_index=True)
-            for col in ["Niveau", "Points de Compétence"]:
+            for col in ["Niveau", "Points de Compétence", "FAVEDS 🤸", "Stratégie 🧠", "Coopération 🤝", "Engagement 🌟"]:
                 st.session_state["students"][col] = pd.to_numeric(st.session_state["students"][col], errors="coerce").fillna(0).astype(int)
             save_data(st.session_state["students"])
             st.success(f"✅ {nom} ajouté avec niveau {niveau} et répartition des points complétée.")
@@ -541,6 +564,11 @@ elif choice == "Fiche Élève":
             st.write(f"**Points de Compétence :** {student_data['Points de Compétence']}")
             if st.button("Fêter ma progression"):
                 st.balloons()
+        with col2:
+            st.write(f"**FAVEDS 🤸 :** {student_data['FAVEDS 🤸']}")
+            st.write(f"**Stratégie 🧠 :** {student_data['Stratégie 🧠']}")
+            st.write(f"**Coopération 🤝 :** {student_data['Coopération 🤝']}")
+            st.write(f"**Engagement 🌟 :** {student_data['Engagement 🌟']}")
         onglets = st.tabs(["🛒 Boutique des Pouvoirs", "🏅 Boutique des Rôles"])
         with onglets[0]:
             st.markdown('<div class="card">', unsafe_allow_html=True)
@@ -570,18 +598,18 @@ elif choice == "Fiche Élève":
         with onglets[1]:
             st.markdown('<div class="card">', unsafe_allow_html=True)
             roles_store = {
-                "🧪 Testeur.euse": {"Coût": 200},
-                "🎭 Démonstrateur.rice": {"Coût": 150},
-                "🔧 Facilitateur.rice": {"Coût": 150},
-                "⚖️ Créateur.rice de règles": {"Coût": 250},
-                "🎯 Meneur.euse tactique": {"Coût": 250},
-                "⚖️ Arbitre / Régulateur.rice": {"Coût": 300},
-                "🤝 Aide-Coach": {"Coût": 250},
-                "📋 Coordinateur.rice de groupe": {"Coût": 300},
-                "🌍 Facilitateur.rice (social)": {"Coût": 250},
-                "⚡ Réducteur.rice des contraintes": {"Coût": 200},
-                "🛤️ Autonome": {"Coût": 200},
-                "🏆 Responsable de séance": {"Coût": 350}
+                "🧪 Testeur.euse": {"Coût": 200, "Compétences Requises": ["FAVEDS 🤸"]},
+                "🎭 Démonstrateur.rice": {"Coût": 150, "Compétences Requises": ["FAVEDS 🤸", "Engagement 🌟"]},
+                "🔧 Facilitateur.rice": {"Coût": 150, "Compétences Requises": ["Coopération 🤝", "Engagement 🌟"]},
+                "⚖️ Créateur.rice de règles": {"Coût": 250, "Compétences Requises": ["Stratégie 🧠"]},
+                "🎯 Meneur.euse tactique": {"Coût": 250, "Compétences Requises": ["Stratégie 🧠", "Coopération 🤝"]},
+                "⚖️ Arbitre / Régulateur.rice": {"Coût": 300, "Compétences Requises": ["Stratégie 🧠", "Engagement 🌟"]},
+                "🤝 Aide-Coach": {"Coût": 250, "Compétences Requises": ["Coopération 🤝", "Engagement 🌟"]},
+                "📋 Coordinateur.rice de groupe": {"Coût": 300, "Compétences Requises": ["Coopération 🤝"]},
+                "🌍 Facilitateur.rice (social)": {"Coût": 250, "Compétences Requises": ["Coopération 🤝", "Engagement 🌟"]},
+                "⚡ Réducteur.rice des contraintes": {"Coût": 200, "Compétences Requises": ["FAVEDS 🤸", "Engagement 🌟"]},
+                "🛤️ Autonome": {"Coût": 200, "Compétences Requises": ["Stratégie 🧠", "Engagement 🌟"]},
+                "🏆 Responsable de séance": {"Coût": 350, "Compétences Requises": ["Stratégie 🧠", "Coopération 🤝", "Engagement 🌟"]}
             }
             selected_role = st.selectbox("🎭 Choisir un rôle", list(roles_store.keys()), key="roles")
             role_cost = roles_store[selected_role]["Coût"]
@@ -589,6 +617,10 @@ elif choice == "Fiche Élève":
             st.info(f"💰 Coût: {role_cost} points de compétence\n\n🔹 Compétences requises: {', '.join(required_compétences)}")
             if st.button("Acquérir ce rôle", key="acheter_role"):
                 student_compétences = {
+                    "FAVEDS 🤸": int(student_data["FAVEDS 🤸"]),
+                    "Stratégie 🧠": int(student_data["Stratégie 🧠"]),
+                    "Coopération 🤝": int(student_data["Coopération 🤝"]),
+                    "Engagement 🌟": int(student_data["Engagement 🌟"])
                 }
                 if int(student_data["Points de Compétence"]) >= role_cost and all(student_compétences[comp] > 0 for comp in required_compétences):
                     current_points = int(student_data["Points de Compétence"])
@@ -600,7 +632,7 @@ elif choice == "Fiche Élève":
                     save_data(st.session_state["students"])
                     st.success(f"🏅 {selected_student} a acquis le rôle '{selected_role}'.")
                 else:
-                    st.error("❌ Points de compétence insuffisants!")
+                    st.error("❌ Points de compétence insuffisants ou compétences requises non atteintes !")
             st.markdown('</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
