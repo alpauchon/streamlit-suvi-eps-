@@ -131,7 +131,7 @@ if not st.session_state["accepted_rules"]:
 ### 🔹 Sécurité et fair-play
 - **Le harcèlement** via le classement ou les points de compétence est **strictement interdit**.
 - **L'enseignant peut modifier, retirer ou ajuster des niveaux en cas de comportement inapproprié**.
-- **Aucun élève ne peut voir les statistiques individuelles des autres** mise à part le top ten.
+- **Aucun élève ne peut voir les statistiques individuelles des autres** mis à part le top ten.
 
 ### 🔹 Boutique des pouvoirs et rôles
 - **Les pouvoirs et rôles ne doivent pas être utilisés pour désavantager les autres élèves**.
